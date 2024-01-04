@@ -4,7 +4,8 @@ const cors = require("cors");
 const app = express();
 const router = require("./routes/main");
 const { resolve } = require("path");
-require("dotenv").config({ path: resolve(__dirname, "./.env") });
+// require("dotenv").config({ path: resolve(__dirname, "./.env") });
+require("dotenv").config();
 
 app.use(cors());
 app.use(express.json());
@@ -34,7 +35,7 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-app.listen(3001, (err, data) => {
+app.listen(8000, (err, data) => {
   if (err) console.error(err);
   console.log("Server up on 3001");
 });
