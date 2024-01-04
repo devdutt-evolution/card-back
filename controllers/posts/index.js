@@ -162,3 +162,14 @@ exports.getPost = async (req, res) => {
     res.sendStatus(500);
   }
 };
+
+exports.getPostHealth = async (req, res) => {
+  try {
+    let post = await Post.findOne().lean();
+
+    res.json({ post });
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+};
