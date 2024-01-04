@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
 const router = require("./routes/main");
+const { resolve } = require("path");
+require("dotenv").config({ path: resolve(__dirname, "./.env") });
 
 app.use(cors());
 app.use(express.json());
@@ -25,7 +27,7 @@ app.use(
 // };
 
 mongoose
-  .connect("mongodb://localhost:27017/demo")
+  .connect(process.env.DB_URL)
   .then((data) => {
     console.log("connected DB");
     // a();
