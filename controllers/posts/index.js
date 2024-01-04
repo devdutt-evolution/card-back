@@ -20,7 +20,7 @@ exports.createPost = async (req, res) => {
   try {
     const { title, body } = req.body;
 
-    await Post.create({ title, body, userId: 1 });
+    await Post.create({ title, body, userId: "65968c17bb2bf29e42fbd3c4" });
 
     res.sendStatus(201);
   } catch (err) {
