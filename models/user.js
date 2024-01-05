@@ -5,6 +5,9 @@ const UserSchema = new mongoose.Schema(
     name: {
       type: String,
     },
+    hash: {
+      type: String,
+    },
     username: {
       type: String,
     },

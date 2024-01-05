@@ -1,4 +1,5 @@
 const { User } = require("../../models/user");
+const { hashIt, pass } = require("../../utils/secure");
 
 exports.getUser = async (req, res) => {
   try {
@@ -12,6 +13,43 @@ exports.getUser = async (req, res) => {
     res.json({ user });
   } catch (err) {
     console.log(err);
+    res.sendStatus(500);
+  }
+};
+
+exports.registerUser = async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+
+    await User.create({ username, email, hash: hashIt(password) });
+
+    res.sendStatus(201);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+};
+
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    let user = await User.findOne({ email }, { hash: 1, username: 1 }).lean();
+
+    if (hashIt(password) == user.hash) {
+      return res.status(200).json({
+        token: pass({
+          email,
+          username: user.username,
+        }),
+      });
+    }
+
+    return res
+      .status(401)
+      .json({ message: "email and password does not match" });
+  } catch (err) {
+    console.error(err);
     res.sendStatus(500);
   }
 };
