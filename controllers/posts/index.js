@@ -32,6 +32,7 @@ exports.createPost = async (req, res) => {
 exports.getPosts = async (req, res) => {
   try {
     const {
+      _q = "",
       _limit = "10",
       _page = "1",
       _sort = "title",
@@ -50,6 +51,13 @@ exports.getPosts = async (req, res) => {
       },
       {
         $limit: parseInt(_limit),
+      },
+      {
+        $project: {
+          userId: 1,
+          title: 1,
+          body: 1,
+        },
       },
       {
         $lookup: {
@@ -73,19 +81,25 @@ exports.getPosts = async (req, res) => {
           path: "$user",
         },
       },
-      {
-        $project: {
-          userId: 1,
-          user: 1,
-          title: 1,
-          body: 1,
-        },
-      },
     ];
-
-    let posts = await Post.aggregate(
-      _expand == "user" ? aggregatePipe : aggregatePipe.slice(0, 3)
-    );
+    let posts;
+    if (_q != "") {
+      aggregatePipe = [
+        {
+          $match: {
+            $text: { $search: _q },
+          },
+        },
+        ...aggregatePipe,
+      ];
+      posts = await Post.aggregate(
+        _expand == "user" ? aggregatePipe : aggregatePipe.slice(0, 5)
+      );
+    } else {
+      posts = await Post.aggregate(
+        _expand == "user" ? aggregatePipe : aggregatePipe.slice(0, 4)
+      );
+    }
 
     res.status(200).json({ posts });
   } catch (err) {
@@ -96,7 +110,13 @@ exports.getPosts = async (req, res) => {
 
 exports.getPost = async (req, res) => {
   try {
-    const { postId } = req.params;
+    let { postId } = req.params;
+    try {
+      postId = new mongoose.Types.ObjectId(postId);
+    } catch (err) {
+      res.json({ post: {} });
+      return;
+    }
 
     let aggregatePipe = [
       {
