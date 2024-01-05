@@ -1,26 +1,31 @@
 const { default: mongoose } = require("mongoose");
 const { Post } = require("../../models/post");
-const { body, validationResult } = require("express-validator");
-
-exports.validatePostBody = (req, res, next) => {
-  body("title").notEmpty().isString().withMessage("title is required");
-  body("body")
-    .notEmpty()
-    .isString()
-    .isLength(15)
-    .withMessage("body is required");
-
-  const result = validationResult(req);
-  if (result.isEmpty()) return next();
-
-  res.send(400).json({ errors: result.array() });
-};
+const { Comment } = require("../../models/comment");
 
 exports.createPost = async (req, res) => {
   try {
     const { title, body } = req.body;
 
     await Post.create({ title, body, userId: "65968c17bb2bf29e42fbd3c4" });
+
+    res.sendStatus(201);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+};
+
+exports.createComment = async (req, res) => {
+  try {
+    const { name, email, body } = req.body;
+    const { postId } = req.params;
+
+    let post = await Post.countDocuments({ _id: postId });
+
+    if (post == 0)
+      return res.status(404).json({ message: "No such post found" });
+
+    await Comment.create({ name, email, body, postId });
 
     res.sendStatus(201);
   } catch (err) {
@@ -110,13 +115,7 @@ exports.getPosts = async (req, res) => {
 
 exports.getPost = async (req, res) => {
   try {
-    let { postId } = req.params;
-    try {
-      postId = new mongoose.Types.ObjectId(postId);
-    } catch (err) {
-      res.json({ post: {} });
-      return;
-    }
+    const { postId } = req.params;
 
     let aggregatePipe = [
       {
@@ -177,17 +176,6 @@ exports.getPost = async (req, res) => {
     let post = await Post.aggregate(aggregatePipe);
 
     res.json({ post: post[0] });
-  } catch (err) {
-    console.log(err);
-    res.sendStatus(500);
-  }
-};
-
-exports.getPostHealth = async (req, res) => {
-  try {
-    let post = await Post.findOne().lean();
-
-    res.json({ post });
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
