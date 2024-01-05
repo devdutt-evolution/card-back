@@ -4,9 +4,16 @@ const { Comment } = require("../../models/comment");
 
 exports.createPost = async (req, res) => {
   try {
-    const { title, body } = req.body;
-
-    await Post.create({ title, body, userId: "65968c17bb2bf29e42fbd3c4" });
+    const { title, body, tobePublished, publishAt } = req.body;
+// console.log("red")
+    if (tobePublished)
+      await Post.create({
+        title,
+        body,
+        publishAt,
+        userId: "65968c17bb2bf29e42fbd3c4",
+      });
+    else await Post.create({ title, body, userId: "65968c17bb2bf29e42fbd3c4" });
 
     res.sendStatus(201);
   } catch (err) {

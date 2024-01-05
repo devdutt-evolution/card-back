@@ -12,8 +12,11 @@ const PostSchema = new mongoose.Schema(
     body: {
       type: String,
     },
+    publishAt: {
+      type: Number,
+    },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 PostSchema.index({ title: "text" });

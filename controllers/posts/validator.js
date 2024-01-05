@@ -1,5 +1,13 @@
-const { body } = require("express-validator");
+const { ExpressValidator } = require("express-validator");
 const { ObjectId } = require("mongoose").Types;
+
+const { body } = new ExpressValidator({
+  isFuture: (value) => {
+    const ct = Date.now();
+    if (value < ct) throw new Error("Schedule time should be set to future.");
+    return value;
+  },
+});
 
 exports.validatePostBody = [
   body("title")
@@ -13,6 +21,15 @@ exports.validatePostBody = [
     .isString()
     .isLength(15)
     .withMessage("body should be atleat 15 chcracters"),
+  body("tobePublished")
+    .default(false)
+    .isBoolean()
+    .withMessage("tobePublished is a boolean field"),
+  body("publishAt")
+    .if((v, { req }) => req.body.tobePublished)
+    .isNumeric()
+    .withMessage("publishAt should be a timestamp")
+    .isFuture(),
 ];
 
 exports.validateCommentBody = [
@@ -24,10 +41,10 @@ exports.validateCommentBody = [
     .withMessage("enter a valid email"),
   body("body")
     .notEmpty()
-    .withMessage("body is required")
+    .withMessage("comment is required")
     .isString()
     .isLength(15)
-    .withMessage("body is should be atleast 15 characters long"),
+    .withMessage("comment is should be atleast 15 characters long"),
 ];
 
 exports.handlePostId = (req, res, next, postId) => {
