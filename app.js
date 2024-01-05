@@ -34,7 +34,7 @@ mongoose
     // a();
   })
   .catch((err) => console.log(err));
-
+require("./cron");
 app.listen(3001, (err, data) => {
   if (err) console.error(err);
   console.log("Server up on 3001");

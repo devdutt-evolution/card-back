@@ -5,7 +5,7 @@ const { Comment } = require("../../models/comment");
 exports.createPost = async (req, res) => {
   try {
     const { title, body, tobePublished, publishAt } = req.body;
-// console.log("red")
+    // console.log("red")
     if (tobePublished)
       await Post.create({
         title,
@@ -69,6 +69,7 @@ exports.getPosts = async (req, res) => {
           userId: 1,
           title: 1,
           body: 1,
+          publishAt: 1,
         },
       },
       {
