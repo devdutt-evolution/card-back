@@ -18,8 +18,8 @@ exports.pass = (payload) => {
   });
 };
 
-exports.checkToken = async (token) => {
+exports.checkToken = (token) => {
   let result = jwt.decode(token, process.env.SECRET);
-  console.log(result);
-  return true;
+
+  return result;
 };

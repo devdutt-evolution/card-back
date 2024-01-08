@@ -11,9 +11,9 @@ exports.createPost = async (req, res) => {
         title,
         body,
         publishAt,
-        userId: "65968c17bb2bf29e42fbd3c4",
+        userId: req.userId,
       });
-    else await Post.create({ title, body, userId: "65968c17bb2bf29e42fbd3c4" });
+    else await Post.create({ title, body, userId: req.userId });
 
     res.sendStatus(201);
   } catch (err) {
@@ -24,7 +24,7 @@ exports.createPost = async (req, res) => {
 
 exports.createComment = async (req, res) => {
   try {
-    const { name, email, body } = req.body;
+    const { body } = req.body;
     const { postId } = req.params;
 
     let post = await Post.countDocuments({ _id: postId });
@@ -32,7 +32,12 @@ exports.createComment = async (req, res) => {
     if (post == 0)
       return res.status(404).json({ message: "No such post found" });
 
-    await Comment.create({ name, email, body, postId });
+    await Comment.create({
+      name: req.username,
+      email: req.email,
+      body,
+      postId,
+    });
 
     res.sendStatus(201);
   } catch (err) {

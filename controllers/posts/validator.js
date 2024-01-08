@@ -33,12 +33,12 @@ exports.validatePostBody = [
 ];
 
 exports.validateCommentBody = [
-  body("name").notEmpty().withMessage("name is required").isString(),
-  body("email")
-    .notEmpty()
-    .withMessage("email is required")
-    .isEmail()
-    .withMessage("enter a valid email"),
+  // body("name").notEmpty().withMessage("name is required").isString(),
+  // body("email")
+  //   .notEmpty()
+  //   .withMessage("email is required")
+  //   .isEmail()
+  //   .withMessage("enter a valid email"),
   body("body")
     .notEmpty()
     .withMessage("comment is required")

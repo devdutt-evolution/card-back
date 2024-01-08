@@ -4,8 +4,12 @@ exports.checkAuth = (req, res, next) => {
   try {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(" ")[1];
-      if (token && checkToken(token)) {
-        req.userId = token._id;
+      if (token) {
+        let payload = checkToken(token);
+
+        req.userId = payload._id;
+        req.email = payload.email;
+        req.username = payload.username;
         return next();
       }
       return res.status(401).json({ message: "Not Authorized" });
