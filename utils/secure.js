@@ -17,3 +17,9 @@ exports.pass = (payload) => {
     expiresIn: "6h",
   });
 };
+
+exports.checkToken = async (token) => {
+  let result = jwt.decode(token, process.env.SECRET);
+  console.log(result);
+  return true;
+};

@@ -17,14 +17,16 @@ const {
   validateLogin,
 } = require("../controllers/users/validator");
 const { validate } = require("../utils/validator");
+const { checkAuth } = require("../controllers/auth/index");
 
-router.post("/posts", validatePostBody, validate, createPost);
-router.get("/posts", getPosts);
+router.post("/posts", checkAuth, validatePostBody, validate, createPost);
+router.get("/posts", checkAuth, getPosts);
 
 router.param("postId", handlePostId);
-router.get("/posts/:postId", getPost);
+router.get("/posts/:postId", checkAuth, getPost);
 router.post(
   "/posts/:postId/comment",
+  checkAuth,
   validateCommentBody,
   validate,
   createComment
@@ -34,6 +36,6 @@ router.post("/register", validateRegisterBody, validate, registerUser);
 router.post("/signin", validateLogin, validate, login);
 
 router.param("userId", handleUserId);
-router.get("/user/:userId", getUser);
+router.get("/user/:userId", checkAuth, getUser);
 
 module.exports = router;

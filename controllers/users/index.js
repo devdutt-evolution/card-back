@@ -39,6 +39,7 @@ exports.login = async (req, res) => {
     if (hashIt(password) == user.hash) {
       return res.status(200).json({
         token: pass({
+          _id: user._id,
           email,
           username: user.username,
         }),
