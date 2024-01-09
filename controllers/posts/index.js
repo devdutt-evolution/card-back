@@ -1,4 +1,4 @@
-const { default: mongoose } = require("mongoose");
+const { default: mongoose, mongo } = require("mongoose");
 const { Post } = require("../../models/post");
 const { Comment } = require("../../models/comment");
 
@@ -61,6 +61,17 @@ exports.getPosts = async (req, res) => {
 
     let aggregatePipe = [
       {
+        $match: {
+          $or: [
+            { publishAt: null },
+            {
+              publishAt: { $gt: Date.now() },
+              userId: new mongoose.Types.ObjectId(req.userId),
+            },
+          ],
+        },
+      },
+      {
         $sort: option,
       },
       {
@@ -115,7 +126,7 @@ exports.getPosts = async (req, res) => {
       );
     } else {
       posts = await Post.aggregate(
-        _expand == "user" ? aggregatePipe : aggregatePipe.slice(0, 4)
+        _expand == "user" ? aggregatePipe : aggregatePipe.slice(0, 5)
       );
     }
 
