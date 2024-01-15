@@ -128,6 +128,24 @@ exports.getPosts = async (req, res) => {
         $limit: parseInt(_limit),
       },
       {
+        from: "comments",
+        localField: "_id",
+        foreignField: "postId",
+        as: "commentCount",
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+            },
+          },
+        ],
+      },
+      {
+        commentCount: {
+          $size: "$commentCount",
+        },
+      },
+      {
         $lookup: {
           from: "users",
           localField: "userId",
@@ -247,7 +265,7 @@ exports.getPost = async (req, res) => {
           numberOfLikes: {
             $size: "$likes",
           },
-          numberOfComments: {
+          commentCount: {
             $size: "$comments",
           },
         },
