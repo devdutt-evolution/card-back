@@ -247,6 +247,9 @@ exports.getPost = async (req, res) => {
           numberOfLikes: {
             $size: "$likes",
           },
+          numberOfComments: {
+            $size: "$comments",
+          },
         },
       },
     ];
