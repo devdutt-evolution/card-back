@@ -86,6 +86,12 @@ exports.getPosts = async (req, res) => {
           title: 1,
           body: 1,
           publishAt: 1,
+          numberOfLikes: {
+            $size: "$likes",
+          },
+          likedByUser: {
+            $in: [req.userId, "$likes"],
+          },
         },
       },
       {
@@ -193,6 +199,12 @@ exports.getPost = async (req, res) => {
           title: 1,
           body: 1,
           comments: 1,
+          likedByUser: {
+            $in: [req.userId, "$likes"],
+          },
+          numberOfLikes: {
+            $size: "$likes",
+          },
         },
       },
     ];
@@ -218,6 +230,7 @@ exports.likePost = async (req, res) => {
     res.sendStatus(500);
   }
 };
+
 exports.unlikePost = async (req, res) => {
   try {
     const { postId } = req.params;
