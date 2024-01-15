@@ -47,6 +47,38 @@ exports.createComment = async (req, res) => {
   }
 };
 
+exports.reactComment = async (req, res) => {
+  try {
+    const { reaction } = req.body;
+    const { commentId } = req.params;
+
+    if (reaction == REACTIONS.LIKE) {
+      await Comment.updateOne(
+        { _id: commentId },
+        {
+          $addToSet: {
+            likes: req.userId,
+          },
+        }
+      );
+    } else if (reaction == REACTIONS.UNLIKE) {
+      await Comment.updateOne(
+        { _id: commentId },
+        {
+          $pull: {
+            likes: req.userId,
+          },
+        }
+      );
+    } else return res.status(400).json({ message: "can only like or unlike" });
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+};
+
 exports.getPosts = async (req, res) => {
   try {
     const {
@@ -185,9 +217,15 @@ exports.getPost = async (req, res) => {
           pipeline: [
             {
               $project: {
-                createdAt: 0,
-                updatedAt: 0,
-                __v: 0,
+                name: 1,
+                email: 1,
+                body: 1,
+                numberOfLikes: {
+                  $size: "$likes",
+                },
+                likedByUser: {
+                  $in: [req.userId, "$likes"],
+                },
               },
             },
           ],
