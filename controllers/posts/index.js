@@ -1,6 +1,7 @@
-const { default: mongoose, mongo } = require("mongoose");
+const { default: mongoose } = require("mongoose");
 const { Post } = require("../../models/post");
 const { Comment } = require("../../models/comment");
+const { REACTIONS } = require("../../utils/consts");
 
 exports.createPost = async (req, res) => {
   try {
@@ -279,24 +280,21 @@ exports.getLikes = async (req, res) => {
   res.json({ users: likes });
 };
 
-exports.likePost = async (req, res) => {
+exports.reactPost = async (req, res) => {
   try {
     const { postId } = req.params;
+    const { reaction } = req.body;
 
-    await Post.updateOne({ _id: postId }, { $addToSet: { likes: req.userId } });
-
-    res.sendStatus(200);
-  } catch (err) {
-    console.log(err);
-    res.sendStatus(500);
-  }
-};
-
-exports.unlikePost = async (req, res) => {
-  try {
-    const { postId } = req.params;
-
-    await Post.updateOne({ _id: postId }, { $pull: { likes: req.userId } });
+    if (reaction == REACTIONS.LIKE) {
+      await Post.updateOne(
+        { _id: postId },
+        { $addToSet: { likes: req.userId } }
+      );
+    } else if (reaction == REACTIONS.UNLIKE) {
+      await Post.updateOne({ _id: postId }, { $pull: { likes: req.userId } });
+    } else {
+      return res.status(400).json({ message: "can only like or unlike" });
+    }
 
     res.sendStatus(200);
   } catch (err) {

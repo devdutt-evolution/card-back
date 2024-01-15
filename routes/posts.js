@@ -4,9 +4,8 @@ const {
   getPosts,
   createComment,
   createPost,
-  likePost,
-  unlikePost,
   getLikes,
+  reactPost,
 } = require("../controllers/posts/index");
 const {
   validateCommentBody,
@@ -22,8 +21,7 @@ router.get("/", checkAuth, getPosts);
 router.param("postId", handlePostId);
 router.get("/:postId", checkAuth, getPost);
 router.get("/:postId/likes", checkAuth, getLikes);
-router.get("/:postId/like", checkAuth, likePost);
-router.get("/:postId/unlike", checkAuth, unlikePost);
+router.put("/:postId/react", checkAuth, reactPost);
 router.post(
   "/:postId/comment",
   checkAuth,
