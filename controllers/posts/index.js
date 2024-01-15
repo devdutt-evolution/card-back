@@ -105,15 +105,6 @@ exports.getPosts = async (req, res) => {
         },
       },
       {
-        $sort: option,
-      },
-      {
-        $skip: (parseInt(_page) - 1) * parseInt(_limit),
-      },
-      {
-        $limit: parseInt(_limit),
-      },
-      {
         $project: {
           userId: 1,
           title: 1,
@@ -126,6 +117,15 @@ exports.getPosts = async (req, res) => {
             $in: [req.userId, "$likes"],
           },
         },
+      },
+      {
+        $sort: option,
+      },
+      {
+        $skip: (parseInt(_page) - 1) * parseInt(_limit),
+      },
+      {
+        $limit: parseInt(_limit),
       },
       {
         $lookup: {
@@ -227,6 +227,9 @@ exports.getPost = async (req, res) => {
                   $in: [req.userId, "$likes"],
                 },
               },
+            },
+            {
+              $sort: { numberOfLikes: -1 },
             },
           ],
         },
