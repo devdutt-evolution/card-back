@@ -205,3 +205,28 @@ exports.getPost = async (req, res) => {
     res.sendStatus(500);
   }
 };
+
+exports.likePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+
+    await Post.updateOne({ _id: postId }, { $addToSet: { likes: req.userId } });
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+};
+exports.unlikePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+
+    await Post.updateOne({ _id: postId }, { $pull: { likes: req.userId } });
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+};

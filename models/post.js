@@ -15,6 +15,9 @@ const PostSchema = new mongoose.Schema(
     publishAt: {
       type: Number,
     },
+    likes: {
+      type: Array,
+    },
   },
   { timestamps: true, versionKey: false }
 );
