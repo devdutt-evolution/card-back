@@ -218,6 +218,67 @@ exports.getPost = async (req, res) => {
   }
 };
 
+exports.getLikes = async (req, res) => {
+  const { postId } = req.params;
+
+  let likePipe = [
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(postId),
+      },
+    },
+    {
+      $project: {
+        user: "$likes",
+      },
+    },
+    {
+      $unwind: {
+        path: "$user",
+      },
+    },
+    {
+      $addFields: {
+        userId: {
+          $toObjectId: "$user",
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+        pipeline: [
+          {
+            $project: {
+              email: 1,
+              username: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $unwind: {
+        path: "$user",
+      },
+    },
+    {
+      $project: {
+        _id: "$user._id",
+        name: "$user.username",
+        email: "$user.email",
+      },
+    },
+  ];
+
+  let likes = await Post.aggregate(likePipe);
+
+  res.json({ users: likes });
+};
+
 exports.likePost = async (req, res) => {
   try {
     const { postId } = req.params;
