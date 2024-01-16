@@ -25,7 +25,7 @@ exports.createPost = async (req, res) => {
 
 exports.createComment = async (req, res) => {
   try {
-    const { body } = req.body;
+    const { comment } = req.body;
     const { postId } = req.params;
 
     let post = await Post.countDocuments({ _id: postId });
@@ -36,7 +36,7 @@ exports.createComment = async (req, res) => {
     await Comment.create({
       name: req.username,
       email: req.email,
-      body,
+      body: comment,
       postId,
     });
 
