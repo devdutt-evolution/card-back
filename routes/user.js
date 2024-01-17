@@ -1,5 +1,10 @@
 const router = require("express").Router();
-const { getUser, registerUser, login } = require("../controllers/users/index");
+const {
+  getUser,
+  registerUser,
+  login,
+  getUsers,
+} = require("../controllers/users/index");
 const {
   handleUserId,
   validateRegisterBody,
@@ -11,6 +16,8 @@ const { reactComment } = require("../controllers/posts");
 
 router.post("/register", validateRegisterBody, validate, registerUser);
 router.post("/signin", validateLogin, validate, login);
+
+router.get("/users", getUsers);
 
 router.param("userId", handleUserId);
 router.get("/user/:userId", checkAuth, getUser);

@@ -17,6 +17,35 @@ exports.getUser = async (req, res) => {
   }
 };
 
+exports.getUsers = async (req, res) => {
+  try {
+    const { _q } = req.query;
+    let rg = new RegExp(`^${_q}`, ["i"]);
+
+    const users = await User.aggregate([
+      {
+        $match: {
+          username: {
+            $regex: rg,
+          },
+        },
+      },
+      {
+        $project: {
+          id: "$_id",
+          display: "$username",
+          _id: 0,
+        },
+      },
+    ]);
+
+    return res.json({ users });
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+};
+
 exports.registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
