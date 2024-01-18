@@ -25,7 +25,7 @@ exports.createPost = async (req, res) => {
 
 exports.createComment = async (req, res) => {
   try {
-    const { comment } = req.body;
+    let { comment } = req.body;
     const { postId } = req.params;
 
     let post = await Post.countDocuments({ _id: postId });
@@ -33,10 +33,24 @@ exports.createComment = async (req, res) => {
     if (post == 0)
       return res.status(404).json({ message: "No such post found" });
 
+    const findTagsPattern = new RegExp(/\s@\[([^\]]+)\]\(\w+\)/, "g");
+
+    const matched = comment.match(findTagsPattern);
+    let tags;
+    if (matched && matched.length > 0) {  
+      tags = matched.map((str) => {
+        let lastNameIndex = str.indexOf("]");
+        let username = str.substring(3, lastNameIndex);
+        let id = str.substring(lastNameIndex + 2, str.length - 1);
+        return { username, id };
+      });
+    }
+
     await Comment.create({
       name: req.username,
       email: req.email,
       body: comment,
+      taggedUsers: tags,
       postId,
     });
 
