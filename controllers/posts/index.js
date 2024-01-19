@@ -2,19 +2,24 @@ const { default: mongoose } = require("mongoose");
 const { Post } = require("../../models/post");
 const { Comment } = require("../../models/comment");
 const { REACTIONS } = require("../../utils/consts");
+const { getTagsFromComment, getTagsFromPost } = require("../../utils/helper");
 
-exports.createPost = async (req, res) => {
+exports.createPost = async (req, res) => {  
   try {
     const { title, body, tobePublished, publishAt } = req.body;
-    // console.log("red")
-    if (tobePublished)
-      await Post.create({
-        title,
-        body,
-        publishAt,
-        userId: req.userId,
-      });
-    else await Post.create({ title, body, userId: req.userId });
+
+    const [tags, post] = getTagsFromPost(body);
+
+    const postObject = {
+      title,
+      body: post,
+      userId: req.userId,
+      taggedUsers: tags,
+    };
+
+    if (tobePublished) Object.assign(postObject, { publishAt });
+
+    await Post.create(postObject);
 
     res.sendStatus(201);
   } catch (err) {
@@ -25,7 +30,7 @@ exports.createPost = async (req, res) => {
 
 exports.createComment = async (req, res) => {
   try {
-    let { comment } = req.body;
+    const { comment } = req.body;
     const { postId } = req.params;
 
     let post = await Post.countDocuments({ _id: postId });
@@ -33,18 +38,7 @@ exports.createComment = async (req, res) => {
     if (post == 0)
       return res.status(404).json({ message: "No such post found" });
 
-    const findTagsPattern = new RegExp(/\s@\[([^\]]+)\]\(\w+\)/, "g");
-
-    const matched = comment.match(findTagsPattern);
-    let tags;
-    if (matched && matched.length > 0) {  
-      tags = matched.map((str) => {
-        let lastNameIndex = str.indexOf("]");
-        let username = str.substring(3, lastNameIndex);
-        let id = str.substring(lastNameIndex + 2, str.length - 1);
-        return { username, id };
-      });
-    }
+    const tags = getTagsFromComment(comment) || [];
 
     await Comment.create({
       name: req.username,

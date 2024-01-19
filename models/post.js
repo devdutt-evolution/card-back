@@ -19,6 +19,10 @@ const PostSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
+    taggedUsers: {
+      type: Array,
+      default: [],
+    },
   },
   { timestamps: true, versionKey: false }
 );
