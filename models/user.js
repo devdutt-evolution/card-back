@@ -11,6 +11,9 @@ const UserSchema = new mongoose.Schema(
     username: {
       type: String,
     },
+    token: {
+      type: String,
+    },
     phone: {
       type: String,
     },

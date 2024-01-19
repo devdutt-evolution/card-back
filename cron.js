@@ -1,7 +1,7 @@
 const cron = require("node-cron");
 const { Post } = require("./models/post");
 
-cron.schedule("* * * * *", async () => {
+cron.schedule("1 * * * *", async () => {
   console.log("started Cron");
   let updated = await Post.updateMany(
     {

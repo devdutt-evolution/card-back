@@ -2,9 +2,14 @@ const { default: mongoose } = require("mongoose");
 const { Post } = require("../../models/post");
 const { Comment } = require("../../models/comment");
 const { REACTIONS } = require("../../utils/consts");
-const { getTagsFromComment, getTagsFromPost } = require("../../utils/helper");
+const {
+  getTagsFromComment,
+  getTagsFromPost,
+  sendMessages,
+} = require("../../utils/helper");
+// const { sendMessages } = require("../../utils/firebase");
 
-exports.createPost = async (req, res) => {  
+exports.createPost = async (req, res) => {
   try {
     const { title, body, tobePublished, publishAt } = req.body;
 
@@ -19,9 +24,11 @@ exports.createPost = async (req, res) => {
 
     if (tobePublished) Object.assign(postObject, { publishAt });
 
-    await Post.create(postObject);
+    const createdPost = await Post.create(postObject);
 
     res.sendStatus(201);
+
+    sendMessages(tags, "post", req.username, createdPost._id);
   } catch (err) {
     console.error(err);
     res.sendStatus(500);
@@ -49,6 +56,7 @@ exports.createComment = async (req, res) => {
     });
 
     res.sendStatus(201);
+    sendMessages(tags, "comment", req.username, postId);
   } catch (err) {
     console.error(err);
     res.sendStatus(500);

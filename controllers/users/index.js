@@ -87,12 +87,12 @@ exports.registerUser = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, fcmToken } = req.body;
 
-    let user = await User.findOne({ email }, { hash: 1, username: 1 }).lean();
+    let user = await User.findOne({ email }, { hash: 1, username: 1 });
 
     if (hashIt(password) == user.hash) {
-      return res.status(200).json({
+      res.status(200).json({
         token: pass({
           _id: user._id,
           email,
@@ -102,11 +102,12 @@ exports.login = async (req, res) => {
         name: user.username,
         email: email,
       });
+    } else {
+      res.status(401).json({ message: "email and password does not match" });
     }
 
-    return res
-      .status(401)
-      .json({ message: "email and password does not match" });
+    user.token = fcmToken;
+    await user.save();
   } catch (err) {
     console.error(err);
     res.sendStatus(500);
