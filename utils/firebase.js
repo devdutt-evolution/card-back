@@ -8,11 +8,7 @@ const adminApp = admin.initializeApp({
 });
 
 exports.sendMessage = async (
-  toToken = [
-    {
-      id: "dkFHrp2GImv4FWhRW3exFx:APA91bHmR1TMOulZdUM0ogupzpKbSzLGdlM2GTZAqNx10Z1gQvAX4Hf7zjg-OUhg5ZBvrVgh4j-Eb5-8G9ldI1YW6wW54HU2efNB2zzoFnxtIocFCSszvZPpziIUTu9infQZMt0xAYI8",
-    },
-  ],
+  toToken = [],
   title = "default title",
   body = "default body",
   url = "https://card-demo-64li.vercel.app/posts"

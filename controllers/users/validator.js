@@ -55,9 +55,5 @@ exports.validateLogin = [
     .withMessage("enter a valid email")
     .emailShouldExist(),
   body("password").notEmpty().withMessage("password is required"),
-  body("fcmToken")
-    .isAlphanumeric()
-    .withMessage("provide a valid fcm token")
-    .notEmpty()
-    .withMessage("fcm token is required"),
+  body("fcmToken").notEmpty().withMessage("fcm token is required"),
 ];
