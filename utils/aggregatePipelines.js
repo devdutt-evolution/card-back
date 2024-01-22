@@ -23,7 +23,7 @@ module.exports = {
           $size: "$likes",
         },
         likedByUser: {
-          $in: [req.userId, "$likes"],
+          $in: [userId, "$likes"],
         },
       },
     },
