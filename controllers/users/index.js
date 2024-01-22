@@ -1,4 +1,8 @@
 const { User } = require("../../models/user");
+const {
+  defaultSuggestionPipeline,
+  getSuggestionPipeline,
+} = require("../../utils/aggregatePipelines");
 const { hashIt, pass } = require("../../utils/secure");
 
 exports.getUser = async (req, res) => {
@@ -22,50 +26,11 @@ exports.getUsers = async (req, res) => {
     const { _q } = req.query;
     let rg = new RegExp(`${_q}`, ["i"]);
 
-    if (_q) {
-      const users = await User.aggregate([
-        {
-          $match: {
-            $or: [
-              {
-                username: {
-                  $regex: rg,
-                },
-              },
-              {
-                name: {
-                  $regex: rg,
-                },
-              },
-            ],
-          },
-        },
-        {
-          $project: {
-            id: "$_id",
-            display: "$name",
-            _id: 0,
-          },
-        },
-      ]);
+    const users = await User.aggregate(
+      _q ? getSuggestionPipeline(rg) : defaultSuggestionPipeline()
+    );
 
-      return res.json({ users });
-    } else {
-      const users = await User.aggregate([
-        {
-          $project: {
-            id: "$_id",
-            display: "$name",
-            _id: 0,
-          },
-        },
-        {
-          $limit: 4,
-        },
-      ]);
-
-      return res.json({ users });
-    }
+    return res.json({ users });
   } catch (err) {
     console.log(err);
     res.sendStatus(500);

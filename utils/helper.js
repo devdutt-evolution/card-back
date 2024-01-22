@@ -1,3 +1,4 @@
+const { getUserTokens } = require("./aggregatePipelines");
 const { sendMessage } = require("./firebase");
 
 exports.getTagsFromPost = (post) => {
@@ -50,43 +51,13 @@ exports.getTagsFromComment = (comment) => {
 };
 
 exports.sendMessages = async (tags, type, username, postId) => {
-  const { default: mongoose } = require("mongoose");
   const { User } = require("../models/user");
 
-  const ids = tags.map((tag) => new mongoose.Types.ObjectId(tag.id));
   const title = `Tagged in ${type}`;
   const body = `You have been mentioned in ${type} by ${username}.`;
   const url = `https://card-demo-64li.vercel.app/post/${postId}`;
 
-  const getTokens = [
-    [
-      {
-        $match: {
-          _id: {
-            $in: ids,
-          },
-        },
-      },
-      {
-        $project: {
-          _id: "$token",
-        },
-      },
-      {
-        $group: {
-          _id: "$_id",
-        },
-      },
-      {
-        $project: {
-          id: "$_id",
-          _id: 0,
-        },
-      },
-    ],
-  ];
+  const users = await User.aggregate(getUserTokens(tags));
 
-  const user = await User.aggregate(getTokens);
-
-  sendMessage(user, title, body, url);
+  sendMessage(users, title, body, url);
 };

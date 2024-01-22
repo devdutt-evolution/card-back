@@ -1,4 +1,3 @@
-const { default: mongoose } = require("mongoose");
 const { Post } = require("../../models/post");
 const { Comment } = require("../../models/comment");
 const { REACTIONS } = require("../../utils/consts");
@@ -7,7 +6,11 @@ const {
   getTagsFromPost,
   sendMessages,
 } = require("../../utils/helper");
-// const { sendMessages } = require("../../utils/firebase");
+const {
+  getPostsPipeline,
+  getPostPipeline,
+  getLikes,
+} = require("../../utils/aggregatePipelines");
 
 exports.createPost = async (req, res) => {
   try {
@@ -88,6 +91,21 @@ exports.reactComment = async (req, res) => {
       );
     } else return res.status(400).json({ message: "can only like or unlike" });
 
+    // const likes = await Comment.aggregate([
+    //   {
+    //     $match: {
+    //       _id: new mongoose.Types.ObjectId(commentId),
+    //     },
+    //   },
+    //   {
+    //     $project: {
+    //       likes: { $size: "$likes" },
+    //       _id: 0,
+    //     },
+    //   },
+    // ]);
+
+    // res.status(200).json({ likes: likes[0].likes });
     res.sendStatus(200);
   } catch (err) {
     console.log(err);
@@ -97,97 +115,19 @@ exports.reactComment = async (req, res) => {
 
 exports.getPosts = async (req, res) => {
   try {
-    const {
-      _q = "",
-      _limit = "10",
-      _page = "1",
-      _sort = "title",
-      _order = "asc",
-      _expand,
-    } = req.query;
+    let { _q, _limit, _page, _sort, _order, _expand } = req.query;
     let option = {};
+
+    _q = _q || "";
+    _limit = _limit || "10";
+    _page = _page || "1";
+    _sort = _sort || "title";
+    _order = _order || "asc";
+
     option[_sort] = _order == "asc" ? 1 : -1;
 
-    let aggregatePipe = [
-      {
-        $match: {
-          $or: [
-            { publishAt: null },
-            {
-              publishAt: { $gt: Date.now() },
-              userId: new mongoose.Types.ObjectId(req.userId),
-            },
-          ],
-        },
-      },
-      {
-        $project: {
-          userId: 1,
-          title: 1,
-          body: 1,
-          publishAt: 1,
-          numberOfLikes: {
-            $size: "$likes",
-          },
-          likedByUser: {
-            $in: [req.userId, "$likes"],
-          },
-        },
-      },
-      {
-        $sort: option,
-      },
-      {
-        $skip: (parseInt(_page) - 1) * parseInt(_limit),
-      },
-      {
-        $limit: parseInt(_limit),
-      },
-      {
-        $lookup: {
-          from: "comments",
-          localField: "_id",
-          foreignField: "postId",
-          as: "commentCount",
-          pipeline: [
-            {
-              $project: {
-                _id: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $addFields: {
-          commentCount: {
-            $size: "$commentCount",
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "user",
-          pipeline: [
-            {
-              $project: {
-                createdAt: 0,
-                updatedAt: 0,
-                __v: 0,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: {
-          path: "$user",
-        },
-      },
-    ];
+    let aggregatePipe = getPostsPipeline(req.userId, option, _page, _limit);
+
     let posts;
     if (_q != "") {
       aggregatePipe = [
@@ -218,81 +158,7 @@ exports.getPost = async (req, res) => {
   try {
     const { postId } = req.params;
 
-    let aggregatePipe = [
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(postId),
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "user",
-          pipeline: [
-            {
-              $project: {
-                createdAt: 0,
-                updatedAt: 0,
-                __v: 0,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: {
-          path: "$user",
-        },
-      },
-      {
-        $lookup: {
-          from: "comments",
-          localField: "_id",
-          foreignField: "postId",
-          as: "comments",
-          pipeline: [
-            {
-              $project: {
-                name: 1,
-                email: 1,
-                body: 1,
-                numberOfLikes: {
-                  $size: "$likes",
-                },
-                likedByUser: {
-                  $in: [req.userId, "$likes"],
-                },
-              },
-            },
-            {
-              $sort: { numberOfLikes: -1 },
-            },
-          ],
-        },
-      },
-      {
-        $project: {
-          userId: 1,
-          user: 1,
-          title: 1,
-          body: 1,
-          comments: 1,
-          likedByUser: {
-            $in: [req.userId, "$likes"],
-          },
-          numberOfLikes: {
-            $size: "$likes",
-          },
-          commentCount: {
-            $size: "$comments",
-          },
-        },
-      },
-    ];
-
-    let post = await Post.aggregate(aggregatePipe);
+    let post = await Post.aggregate(getPostPipeline(postId, req.userId));
 
     res.json({ post: post[0] });
   } catch (err) {
@@ -304,60 +170,7 @@ exports.getPost = async (req, res) => {
 exports.getLikes = async (req, res) => {
   const { postId } = req.params;
 
-  let likePipe = [
-    {
-      $match: {
-        _id: new mongoose.Types.ObjectId(postId),
-      },
-    },
-    {
-      $project: {
-        user: "$likes",
-      },
-    },
-    {
-      $unwind: {
-        path: "$user",
-      },
-    },
-    {
-      $addFields: {
-        userId: {
-          $toObjectId: "$user",
-        },
-      },
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "userId",
-        foreignField: "_id",
-        as: "user",
-        pipeline: [
-          {
-            $project: {
-              email: 1,
-              username: 1,
-            },
-          },
-        ],
-      },
-    },
-    {
-      $unwind: {
-        path: "$user",
-      },
-    },
-    {
-      $project: {
-        _id: "$user._id",
-        name: "$user.username",
-        email: "$user.email",
-      },
-    },
-  ];
-
-  let likes = await Post.aggregate(likePipe);
+  const likes = await Post.aggregate(getLikes(postId));
 
   res.json({ users: likes });
 };
@@ -378,6 +191,21 @@ exports.reactPost = async (req, res) => {
       return res.status(400).json({ message: "can only like or unlike" });
     }
 
+    // const likes = await Post.aggregate([
+    //   {
+    //     $match: {
+    //       _id: new mongoose.Types.ObjectId(postId),
+    //     },
+    //   },
+    //   {
+    //     $project: {
+    //       likes: { $size: "$likes" },
+    //       _id: 0,
+    //     },
+    //   },
+    // ]);
+
+    // res.status(200).json({ likes: likes[0].likes });
     res.sendStatus(200);
   } catch (err) {
     console.log(err);
