@@ -78,8 +78,8 @@ exports.sendMessages = async (tags, type, username, postId, commentId) => {
   sendMessage(users, title, body, url);
 };
 
-exports.sendMessageOnLike = async (likeObject, username, postId) => {
-  const { likes, token } = likeObject;
+exports.sendMessageOnLikePost = async (likeObject, username, postId) => {
+  const { likes, token, userId } = likeObject;
 
   const title = `${username} liked your post`;
   const body =
@@ -90,11 +90,13 @@ exports.sendMessageOnLike = async (likeObject, username, postId) => {
       : ".";
   const url = `/post/${postId}`;
 
+  await Notification.create({ userId, title, description: body, url });
+
   sendMessage([token], title, body, url);
 };
 
-exports.sendMessageOnComment = async (likeObject, username, commentId) => {
-  const { likes, token, postId } = likeObject;
+exports.sendMessageOnLikeComment = async (likeObject, username, commentId) => {
+  const { likes, token, postId, userId } = likeObject;
 
   const title = `${username} liked your comment`;
   const body =
@@ -104,6 +106,8 @@ exports.sendMessageOnComment = async (likeObject, username, commentId) => {
       ? `${username} liked your comment`
       : ".";
   const url = `/post/${postId}#${commentId}`;
+
+  await Notification.create({ userId, title, description: body, url });
 
   sendMessage([token], title, body, url);
 };

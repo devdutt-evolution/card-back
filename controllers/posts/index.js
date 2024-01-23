@@ -5,8 +5,8 @@ const {
   getTagsFromComment,
   getTagsFromPost,
   sendMessages,
-  sendMessageOnLike,
-  sendMessageOnComment,
+  sendMessageOnLikeComment,
+  sendMessageOnLikePost,
 } = require("../../utils/helper");
 const {
   getPostsPipeline,
@@ -102,7 +102,7 @@ exports.reactComment = async (req, res) => {
 
     if (reaction == REACTIONS.LIKE) {
       const likes = await Comment.aggregate(getCountLikesComments(commentId));
-      sendMessageOnComment(likes[0], req.username, commentId);
+      sendMessageOnLikeComment(likes[0], req.username, commentId);
     }
 
     res.sendStatus(200);
@@ -194,7 +194,7 @@ exports.reactPost = async (req, res) => {
     if (reaction == REACTIONS.LIKE) {
       // returns  { likes, token }
       const likes = await Post.aggregate(getCountLikesPosts(postId));
-      sendMessageOnLike(likes[0], req.username, postId);
+      sendMessageOnLikePost(likes[0], req.username, postId);
     }
 
     res.sendStatus(200);

@@ -287,7 +287,6 @@ module.exports = {
           {
             $project: {
               token: 1,
-              _id: 0,
             },
           },
         ],
@@ -304,6 +303,7 @@ module.exports = {
           $size: "$likes",
         },
         token: "$user.token",
+        userId: "$user._id",
         _id: 0,
       },
     },
@@ -324,7 +324,6 @@ module.exports = {
           {
             $project: {
               token: 1,
-              _id: 0,
             },
           },
         ],
@@ -342,6 +341,7 @@ module.exports = {
         },
         postId: "$postId",
         token: "$user.token",
+        userId: "$user._id",
         _id: 0,
       },
     },
