@@ -11,6 +11,7 @@ const {
   getPostPipeline,
   getLikes,
 } = require("../../utils/aggregatePipelines");
+const { Notification } = require("../../models/notification");
 
 exports.createPost = async (req, res) => {
   try {
@@ -31,6 +32,7 @@ exports.createPost = async (req, res) => {
 
     res.sendStatus(201);
 
+    // send fcm and save it in DB
     sendMessages(tags, "post", req.username, createdPost._id);
   } catch (err) {
     console.error(err);
@@ -59,6 +61,8 @@ exports.createComment = async (req, res) => {
     });
 
     res.sendStatus(201);
+
+    // send fcm and save it in DB
     sendMessages(tags, "comment", req.username, postId);
   } catch (err) {
     console.error(err);
@@ -206,6 +210,44 @@ exports.reactPost = async (req, res) => {
     // ]);
 
     // res.status(200).json({ likes: likes[0].likes });
+    res.sendStatus(200);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+};
+
+exports.getNotifications = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const notifications = await Notification.find(
+      {
+        userId,
+        seen: false,
+      },
+      { createdAt: 0, updatedAt: 0, userId: 0 }
+    ).lean();
+
+    res.status(200).json({ notifications });
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+};
+
+exports.markNotificationSeen = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    await Notification.updateMany(
+      {
+        userId,
+        seen: false,
+      },
+      { $set: { seen: true } }
+    );
+
     res.sendStatus(200);
   } catch (err) {
     console.log(err);

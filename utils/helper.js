@@ -1,6 +1,3 @@
-const { getUserTokens } = require("./aggregatePipelines");
-const { sendMessage } = require("./firebase");
-
 exports.getTagsFromPost = (post) => {
   const jsdom = require("jsdom");
   const { JSDOM } = jsdom;
@@ -51,13 +48,27 @@ exports.getTagsFromComment = (comment) => {
 };
 
 exports.sendMessages = async (tags, type, username, postId) => {
+  if (!tags || tags.length == 0) return;
+  const { getUserTokens } = require("./aggregatePipelines");
+  const { sendMessage } = require("./firebase");
   const { User } = require("../models/user");
+  const { Notification } = require("../models/notification");
 
   const title = `Tagged in ${type}`;
   const body = `You have been mentioned in ${type} by ${username}.`;
   const url = `https://card-demo-64li.vercel.app/post/${postId}`;
 
+  // saving notifications
+  const payload = tags.map((tagObj) => {
+    return {
+      userId: tagObj.id,
+      title,
+      description: body,
+    };
+  });
   const users = await User.aggregate(getUserTokens(tags));
-
+  // saved notifications
+  await Notification.create(payload);
+  // sending via firebase
   sendMessage(users, title, body, url);
 };
