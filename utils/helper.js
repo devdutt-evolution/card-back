@@ -47,7 +47,7 @@ exports.getTagsFromComment = (comment) => {
   return tags;
 };
 
-exports.sendMessages = async (tags, type, username, postId) => {
+exports.sendMessages = async (tags, type, username, postId, commentId) => {
   if (!tags || tags.length == 0) return;
   const { getUserTokens } = require("./aggregatePipelines");
   const { sendMessage } = require("./firebase");
@@ -56,7 +56,9 @@ exports.sendMessages = async (tags, type, username, postId) => {
 
   const title = `Tagged in ${type}`;
   const body = `You have been mentioned in ${type} by ${username}.`;
-  const url = `https://card-demo-64li.vercel.app/post/${postId}`;
+  let url = !commentId
+    ? `${process.env.FRONT_END}/post/${postId}`
+    : `${process.env.FRONT_END}/post/${postId}#${commentId}`;
 
   // saving notifications
   const payload = tags.map((tagObj) => {
@@ -64,8 +66,10 @@ exports.sendMessages = async (tags, type, username, postId) => {
       userId: tagObj.id,
       title,
       description: body,
+      url: !commentId ? `/post/${postId}` : `/post/${postId}#${commentId}`,
     };
   });
+
   const users = await User.aggregate(getUserTokens(tags));
   // saved notifications
   await Notification.create(payload);
