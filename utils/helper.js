@@ -1,3 +1,8 @@
+const { getUserTokens } = require("./aggregatePipelines");
+const { sendMessage } = require("./firebase");
+const { User } = require("../models/user");
+const { Notification } = require("../models/notification");
+
 exports.getTagsFromPost = (post) => {
   const jsdom = require("jsdom");
   const { JSDOM } = jsdom;
@@ -49,10 +54,6 @@ exports.getTagsFromComment = (comment) => {
 
 exports.sendMessages = async (tags, type, username, postId, commentId) => {
   if (!tags || tags.length == 0) return;
-  const { getUserTokens } = require("./aggregatePipelines");
-  const { sendMessage } = require("./firebase");
-  const { User } = require("../models/user");
-  const { Notification } = require("../models/notification");
 
   const title = `Tagged in ${type}`;
   const body = `You have been mentioned in ${type} by ${username}.`;
@@ -75,4 +76,34 @@ exports.sendMessages = async (tags, type, username, postId, commentId) => {
   await Notification.create(payload);
   // sending via firebase
   sendMessage(users, title, body, url);
+};
+
+exports.sendMessageOnLike = async (likeObject, username, postId) => {
+  const { likes, token } = likeObject;
+
+  const title = `${username} liked your post`;
+  const body =
+    likes > 1
+      ? `${username} & ${likes - 1} others liked your post.`
+      : likes == 1
+      ? `${username} liked your post`
+      : ".";
+  const url = `/post/${postId}`;
+
+  sendMessage([token], title, body, url);
+};
+
+exports.sendMessageOnComment = async (likeObject, username, commentId) => {
+  const { likes, token, postId } = likeObject;
+
+  const title = `${username} liked your comment`;
+  const body =
+    likes > 1
+      ? `${username} & ${likes - 1} others liked your comment.`
+      : likes == 1
+      ? `${username} liked your comment`
+      : ".";
+  const url = `/post/${postId}#${commentId}`;
+
+  sendMessage([token], title, body, url);
 };

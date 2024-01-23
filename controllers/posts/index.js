@@ -5,11 +5,15 @@ const {
   getTagsFromComment,
   getTagsFromPost,
   sendMessages,
+  sendMessageOnLike,
+  sendMessageOnComment,
 } = require("../../utils/helper");
 const {
   getPostsPipeline,
   getPostPipeline,
   getLikes,
+  getCountLikesComments,
+  getCountLikesPosts,
 } = require("../../utils/aggregatePipelines");
 const { Notification } = require("../../models/notification");
 
@@ -58,6 +62,7 @@ exports.createComment = async (req, res) => {
       body: comment,
       taggedUsers: tags,
       postId,
+      userId: req.userId,
     });
 
     res.sendStatus(201);
@@ -95,21 +100,11 @@ exports.reactComment = async (req, res) => {
       );
     } else return res.status(400).json({ message: "can only like or unlike" });
 
-    // const likes = await Comment.aggregate([
-    //   {
-    //     $match: {
-    //       _id: new mongoose.Types.ObjectId(commentId),
-    //     },
-    //   },
-    //   {
-    //     $project: {
-    //       likes: { $size: "$likes" },
-    //       _id: 0,
-    //     },
-    //   },
-    // ]);
+    if (reaction == REACTIONS.LIKE) {
+      const likes = await Comment.aggregate(getCountLikesComments(commentId));
+      sendMessageOnComment(likes[0], req.username, commentId);
+    }
 
-    // res.status(200).json({ likes: likes[0].likes });
     res.sendStatus(200);
   } catch (err) {
     console.log(err);
@@ -195,21 +190,13 @@ exports.reactPost = async (req, res) => {
       return res.status(400).json({ message: "can only like or unlike" });
     }
 
-    // const likes = await Post.aggregate([
-    //   {
-    //     $match: {
-    //       _id: new mongoose.Types.ObjectId(postId),
-    //     },
-    //   },
-    //   {
-    //     $project: {
-    //       likes: { $size: "$likes" },
-    //       _id: 0,
-    //     },
-    //   },
-    // ]);
+    // firebase notifications
+    if (reaction == REACTIONS.LIKE) {
+      // returns  { likes, token }
+      const likes = await Post.aggregate(getCountLikesPosts(postId));
+      sendMessageOnLike(likes[0], req.username, postId);
+    }
 
-    // res.status(200).json({ likes: likes[0].likes });
     res.sendStatus(200);
   } catch (err) {
     console.log(err);

@@ -271,4 +271,79 @@ module.exports = {
       },
     ];
   },
+  getCountLikesPosts: (postId) => [
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(postId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+        pipeline: [
+          {
+            $project: {
+              token: 1,
+              _id: 0,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $unwind: {
+        path: "$user",
+      },
+    },
+    {
+      $project: {
+        likes: {
+          $size: "$likes",
+        },
+        token: "$user.token",
+        _id: 0,
+      },
+    },
+  ],
+  getCountLikesComments: (commentId) => [
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(commentId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+        pipeline: [
+          {
+            $project: {
+              token: 1,
+              _id: 0,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $unwind: {
+        path: "$user",
+      },
+    },
+    {
+      $project: {
+        likes: {
+          $size: "$likes",
+        },
+        postId: "$postId",
+        token: "$user.token",
+        _id: 0,
+      },
+    },
+  ],
 };
