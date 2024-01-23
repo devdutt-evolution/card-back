@@ -227,7 +227,9 @@ exports.getNotifications = async (req, res) => {
         seen: false,
       },
       { createdAt: 0, updatedAt: 0, userId: 0 }
-    ).lean();
+    )
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.status(200).json({ notifications });
   } catch (err) {
