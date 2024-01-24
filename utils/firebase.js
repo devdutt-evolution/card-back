@@ -7,6 +7,15 @@ const adminApp = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
+/**
+ * sends fcm messages to users
+ *
+ * @param {Array<string>} toToken array of tokens to send fcm to
+ * @param {string} title title of the notification
+ * @param {string} body body/details of the notification
+ * @param {string} url URI to get redirected to on click of notification
+ * @returns void
+ */
 exports.sendMessage = async (
   toToken = [],
   title = "default title",

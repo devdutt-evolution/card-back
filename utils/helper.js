@@ -1,15 +1,24 @@
+const { JSDOM } = require("jsdom");
 const { getUserTokens } = require("./aggregatePipelines");
 const { sendMessage } = require("./firebase");
 const { User } = require("../models/user");
 const { Notification } = require("../models/notification");
 
-exports.getTagsFromPost = (post) => {
-  const jsdom = require("jsdom");
-  const { JSDOM } = jsdom;
+/**
+ * @typedef {({id: string, token: string})} Tag
+ * @typedef {([Array<Tag>, string])} TagsFromPost
+ */
 
+/**
+ * updates the postBody with a link to users profile and returns it and tagged users
+ *
+ * @param {string} postBody string of HTML received while creating a post
+ * @returns {TagsFromPost} tags and postBody to save
+ */
+exports.getTagsFromPost = (postBody) => {
   const {
     window: { document },
-  } = new JSDOM(post);
+  } = new JSDOM(postBody);
 
   let tags = [];
 
@@ -31,10 +40,16 @@ exports.getTagsFromPost = (post) => {
     });
   });
 
-  post = document.querySelector("body").innerHTML;
-  return [tags, post];
+  postBody = document.querySelector("body").innerHTML;
+  return [tags, postBody];
 };
 
+/**
+ * returns tagged users from comment
+ *
+ * @param {string} commentBody commentBody to extract tags from
+ * @returns {Array<Tag>} tagged users in comment
+ */
 exports.getTagsFromComment = (comment) => {
   const findTagsPattern = new RegExp(/@\[([^\]]+)\]\(\w+\)/, "g");
 
@@ -52,6 +67,16 @@ exports.getTagsFromComment = (comment) => {
   return tags;
 };
 
+/**
+ * sends messages to the tagged users
+ *
+ * @param {Array<Tag>} tags tagged users
+ * @param {string} type tagged in comment of post
+ * @param {string} username username of user who tagged
+ * @param {string} postId post's unique ID in which user is tagged
+ * @param {?string} commentId comment's unique ID if tagged in comment
+ * @returns void
+ */
 exports.sendMessages = async (tags, type, username, postId, commentId) => {
   if (!tags || tags.length == 0) return;
 
@@ -78,6 +103,13 @@ exports.sendMessages = async (tags, type, username, postId, commentId) => {
   sendMessage(users, title, body, url);
 };
 
+/**
+ * sends messages to the user whose post is liked
+ *
+ * @param {({likes: number, token: string, userId: string})} likeObject object returned from DB
+ * @param {string} username user who liked
+ * @param {string} postId post which is liked
+ */
 exports.sendMessageOnLikePost = async (likeObject, username, postId) => {
   const { likes, token, userId } = likeObject;
 
@@ -95,6 +127,13 @@ exports.sendMessageOnLikePost = async (likeObject, username, postId) => {
   sendMessage([token], title, body, url);
 };
 
+/**
+ * sends message to the comment creator
+ *
+ * @param {({likes: number, token: string, postId: string, userId: string})} likeObject
+ * @param {string} username user who liked
+ * @param {string} commentId comment which is liked
+ */
 exports.sendMessageOnLikeComment = async (likeObject, username, commentId) => {
   const { likes, token, postId, userId } = likeObject;
 

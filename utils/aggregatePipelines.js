@@ -1,6 +1,15 @@
 const mongoose = require("mongoose");
 
 module.exports = {
+  /**
+   * It returns a aggregatePipeline to fetch posts with pagination from DB
+   *
+   * @param {string} userId users unique ID
+   * @param {Record<string, number>} option object with sort field
+   * @param {number} _page page number for pagination
+   * @param {number} _limit per page documents
+   * @returns aggreagteQuery for fetch posts
+   */
   getPostsPipeline: (userId, option, _page, _limit) => [
     {
       $match: {
@@ -81,6 +90,12 @@ module.exports = {
       },
     },
   ],
+  /**
+   * 
+   * @param {string} postId post's unique ID
+   * @param {string} userId user's unique ID
+   * @returns aggregatePipeline to fetch post details
+   */
   getPostPipeline: (postId, userId) => [
     {
       $match: {
@@ -154,6 +169,12 @@ module.exports = {
       },
     },
   ],
+  /**
+   * get likes for perticular post with user's details who has liked the post
+   * 
+   * @param {string} postId post's unique ID
+   * @returns aggregatePipeline to get likes
+   */
   getLikes: (postId) => [
     {
       $match: {
@@ -206,6 +227,11 @@ module.exports = {
       },
     },
   ],
+  /**
+   * To get the default first four users while hitting the default '@' while mentioning
+   * 
+   * @returns aggregatePipeline to get Users
+   */
   defaultSuggestionPipeline: () => [
     {
       $project: {
@@ -218,6 +244,12 @@ module.exports = {
       $limit: 4,
     },
   ],
+  /**
+   * It returns the users whose username or displayName mathches the provided regex expression
+   * 
+   * @param {RegExp} rg 
+   * @returns aggregatePipeline to fetch users
+   */
   getSuggestionPipeline: (rg) => [
     {
       $match: {
@@ -243,6 +275,12 @@ module.exports = {
       },
     },
   ],
+  /**
+   * It returns the tagged user's unique Id and fcmToken 
+   * 
+   * @param {Array<{ id: string, token: string }>} tags 
+   * @returns aggregatePipeline to get Tagged users
+   */
   getUserTokens: (tags) => {
     const ids = tags.map((tag) => new mongoose.Types.ObjectId(tag.id));
     return [
@@ -271,6 +309,12 @@ module.exports = {
       },
     ];
   },
+  /**
+   * to get user's token who needs to get notified and count likes on post
+   * 
+   * @param {string} postId post's unique ID which is liked
+   * @returns aggregatePipeline to return `{ token, userId, likes }`
+   */
   getCountLikesPosts: (postId) => [
     {
       $match: {
@@ -308,6 +352,12 @@ module.exports = {
       },
     },
   ],
+  /**
+   * to get user's token who needs to get notified and count likes on comment
+   * 
+   * @param {string} commentId comment's unique ID which is liked
+   * @returns aggregatePipe to fetch `{token, userId, token, postId}`
+   */
   getCountLikesComments: (commentId) => [
     {
       $match: {
