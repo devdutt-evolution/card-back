@@ -1,21 +1,16 @@
 const { Post } = require("../../models/post");
-const { Comment } = require("../../models/comment");
 const { REACTIONS } = require("../../utils/consts");
 const {
-  getTagsFromComment,
   getTagsFromPost,
   sendMessages,
-  sendMessageOnLikeComment,
   sendMessageOnLikePost,
 } = require("../../utils/helper");
 const {
   getPostsPipeline,
   getPostPipeline,
   getLikes,
-  getCountLikesComments,
   getCountLikesPosts,
 } = require("../../utils/aggregatePipelines");
-const { Notification } = require("../../models/notification");
 
 exports.createPost = async (req, res) => {
   try {
@@ -40,74 +35,6 @@ exports.createPost = async (req, res) => {
     sendMessages(tags, "post", req.username, createdPost._id);
   } catch (err) {
     console.error(err);
-    res.sendStatus(500);
-  }
-};
-
-exports.createComment = async (req, res) => {
-  try {
-    const { comment } = req.body;
-    const { postId } = req.params;
-
-    let post = await Post.countDocuments({ _id: postId });
-
-    if (post == 0)
-      return res.status(404).json({ message: "No such post found" });
-
-    const tags = getTagsFromComment(comment) || [];
-
-    const createdComment = await Comment.create({
-      name: req.username,
-      email: req.email,
-      body: comment,
-      taggedUsers: tags,
-      postId,
-      userId: req.userId,
-    });
-
-    res.sendStatus(201);
-
-    // send fcm and save it in DB
-    sendMessages(tags, "comment", req.username, postId, createdComment._id);
-  } catch (err) {
-    console.error(err);
-    res.sendStatus(500);
-  }
-};
-
-exports.reactComment = async (req, res) => {
-  try {
-    const { reaction } = req.body;
-    const { commentId } = req.params;
-
-    if (reaction == REACTIONS.LIKE) {
-      await Comment.updateOne(
-        { _id: commentId },
-        {
-          $addToSet: {
-            likes: req.userId,
-          },
-        }
-      );
-    } else if (reaction == REACTIONS.UNLIKE) {
-      await Comment.updateOne(
-        { _id: commentId },
-        {
-          $pull: {
-            likes: req.userId,
-          },
-        }
-      );
-    } else return res.status(400).json({ message: "can only like or unlike" });
-
-    if (reaction == REACTIONS.LIKE) {
-      const likes = await Comment.aggregate(getCountLikesComments(commentId));
-      sendMessageOnLikeComment(likes[0], req.username, commentId);
-    }
-
-    res.sendStatus(200);
-  } catch (err) {
-    console.log(err);
     res.sendStatus(500);
   }
 };
@@ -196,46 +123,6 @@ exports.reactPost = async (req, res) => {
       const likes = await Post.aggregate(getCountLikesPosts(postId));
       sendMessageOnLikePost(likes[0], req.username, postId);
     }
-
-    res.sendStatus(200);
-  } catch (err) {
-    console.log(err);
-    res.sendStatus(500);
-  }
-};
-
-exports.getNotifications = async (req, res) => {
-  try {
-    const userId = req.userId;
-
-    const notifications = await Notification.find(
-      {
-        userId,
-        seen: false,
-      },
-      { createdAt: 0, updatedAt: 0, userId: 0 }
-    )
-      .sort({ createdAt: -1 })
-      .lean();
-
-    res.status(200).json({ notifications });
-  } catch (err) {
-    console.log(err);
-    res.sendStatus(500);
-  }
-};
-
-exports.markNotificationSeen = async (req, res) => {
-  try {
-    const userId = req.userId;
-
-    await Notification.updateMany(
-      {
-        userId,
-        seen: false,
-      },
-      { $set: { seen: true } }
-    );
 
     res.sendStatus(200);
   } catch (err) {

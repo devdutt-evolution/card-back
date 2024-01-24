@@ -2,11 +2,11 @@ const router = require("express").Router();
 const {
   getPost,
   getPosts,
-  createComment,
   createPost,
   getLikes,
   reactPost,
 } = require("../controllers/posts/index");
+const { createComment } = require("../controllers/posts/comment/index");
 const {
   validateCommentBody,
   validatePostBody,
