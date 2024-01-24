@@ -124,7 +124,7 @@ exports.sendMessageOnLikePost = async (likeObject, username, postId) => {
 
   await Notification.create({ userId, title, description: body, url });
 
-  sendMessage([token], title, body, url);
+  sendMessage([{ id: token }], title, body, url);
 };
 
 /**
@@ -148,5 +148,5 @@ exports.sendMessageOnLikeComment = async (likeObject, username, commentId) => {
 
   await Notification.create({ userId, title, description: body, url });
 
-  sendMessage([token], title, body, url);
+  sendMessage([{ id: token }], title, body, url);
 };
