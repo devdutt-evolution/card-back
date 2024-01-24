@@ -5,15 +5,15 @@ const {
   createPost,
   getLikes,
   reactPost,
-} = require("../controllers/posts/index");
-const { createComment } = require("../controllers/posts/comment/index");
+} = require("../controllers/posts");
+const { createComment } = require("../controllers/posts/comment");
 const {
   validateCommentBody,
   validatePostBody,
   handlePostId,
 } = require("../controllers/posts/validator");
 const { validate } = require("../utils/validator");
-const { checkAuth } = require("../controllers/auth/index");
+const { checkAuth } = require("../controllers/auth");
 
 router.post("/", checkAuth, validatePostBody, validate, createPost);
 router.get("/", checkAuth, getPosts);

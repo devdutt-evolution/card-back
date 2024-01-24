@@ -4,15 +4,15 @@ const {
   registerUser,
   login,
   getUsers,
-} = require("../controllers/users/index");
+} = require("../controllers/users");
 const {
   handleUserId,
   validateRegisterBody,
   validateLogin,
 } = require("../controllers/users/validator");
 const { validate } = require("../utils/validator");
-const { checkAuth } = require("../controllers/auth/index");
-const { reactComment } = require("../controllers/posts/comment/index");
+const { checkAuth } = require("../controllers/auth");
+const { reactComment } = require("../controllers/posts/comment");
 
 // auth
 router.post("/register", validateRegisterBody, validate, registerUser);
