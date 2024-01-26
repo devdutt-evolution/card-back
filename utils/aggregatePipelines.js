@@ -98,7 +98,7 @@ module.exports = {
     {
       $addFields: {
         likedByUser: {
-          $gte: [
+          $gt: [
             {
               $size: "$userLike",
             },
