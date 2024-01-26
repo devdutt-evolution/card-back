@@ -5,6 +5,11 @@
  */
 const REACTIONS = {
   LIKE: "like",
+  HEART: "heart",
+  HAPPY: "happy",
+  VERIFIED: "verified",
+  SAD: "sad",
+  ANGRY: "angry",
   UNLIKE: "unlike",
 };
 

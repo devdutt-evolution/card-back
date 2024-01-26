@@ -31,8 +31,14 @@ module.exports = {
         numberOfLikes: {
           $size: "$likes",
         },
-        likedByUser: {
-          $in: [userId, "$likes"],
+        userLike: {
+          $filter: {
+            input: "$likes",
+            as: "like",
+            cond: {
+              $eq: ["$$like.userId", userId],
+            },
+          },
         },
       },
     },
@@ -89,9 +95,27 @@ module.exports = {
         path: "$user",
       },
     },
+    {
+      $addFields: {
+        likedByUser: {
+          $gte: [
+            {
+              $size: "$userLike",
+            },
+            0,
+          ],
+        },
+      },
+    },
+    {
+      $unwind: {
+        path: "$userLike",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
   ],
   /**
-   * 
+   *
    * @param {string} postId post's unique ID
    * @param {string} userId user's unique ID
    * @returns aggregatePipeline to fetch post details
@@ -140,8 +164,23 @@ module.exports = {
                 $size: "$likes",
               },
               likedByUser: {
-                $in: [userId, "$likes"],
+                $in: [userId, "$likes.userId"],
               },
+              userLike: {
+                $filter: {
+                  input: "$likes",
+                  as: "like",
+                  cond: {
+                    $eq: ["$$like.userId", userId],
+                  },
+                },
+              },
+            },
+          },
+          {
+            $unwind: {
+              path: "$userLike",
+              preserveNullAndEmptyArrays: true,
             },
           },
           {
@@ -158,7 +197,7 @@ module.exports = {
         body: 1,
         comments: 1,
         likedByUser: {
-          $in: [userId, "$likes"],
+          $in: [userId, "$likes.userId"],
         },
         numberOfLikes: {
           $size: "$likes",
@@ -166,12 +205,27 @@ module.exports = {
         commentCount: {
           $size: "$comments",
         },
+        userLike: {
+          $filter: {
+            input: "$likes",
+            as: "like",
+            cond: {
+              $eq: ["$$like.userId", userId],
+            },
+          },
+        },
+      },
+    },
+    {
+      $unwind: {
+        path: "$userLike",
+        preserveNullAndEmptyArrays: true,
       },
     },
   ],
   /**
    * get likes for perticular post with user's details who has liked the post
-   * 
+   *
    * @param {string} postId post's unique ID
    * @returns aggregatePipeline to get likes
    */
@@ -229,7 +283,7 @@ module.exports = {
   ],
   /**
    * To get the default first four users while hitting the default '@' while mentioning
-   * 
+   *
    * @returns aggregatePipeline to get Users
    */
   defaultSuggestionPipeline: () => [
@@ -246,8 +300,8 @@ module.exports = {
   ],
   /**
    * It returns the users whose username or displayName mathches the provided regex expression
-   * 
-   * @param {RegExp} rg 
+   *
+   * @param {RegExp} rg
    * @returns aggregatePipeline to fetch users
    */
   getSuggestionPipeline: (rg) => [
@@ -276,9 +330,9 @@ module.exports = {
     },
   ],
   /**
-   * It returns the tagged user's unique Id and fcmToken 
-   * 
-   * @param {Array<{ id: string, token: string }>} tags 
+   * It returns the tagged user's unique Id and fcmToken
+   *
+   * @param {Array<{ id: string, token: string }>} tags
    * @returns aggregatePipeline to get Tagged users
    */
   getUserTokens: (tags) => {
@@ -311,7 +365,7 @@ module.exports = {
   },
   /**
    * to get user's token who needs to get notified and count likes on post
-   * 
+   *
    * @param {string} postId post's unique ID which is liked
    * @returns aggregatePipeline to return `{ token, userId, likes }`
    */
@@ -354,7 +408,7 @@ module.exports = {
   ],
   /**
    * to get user's token who needs to get notified and count likes on comment
-   * 
+   *
    * @param {string} commentId comment's unique ID which is liked
    * @returns aggregatePipe to fetch `{token, userId, token, postId}`
    */

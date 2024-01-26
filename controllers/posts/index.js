@@ -54,8 +54,7 @@ exports.getPosts = async (req, res) => {
 
     let aggregatePipe = getPostsPipeline(req.userId, option, _page, _limit);
 
-    let posts;
-    if (_q != "") {
+    if (_q || _q != "") {
       aggregatePipe = [
         {
           $match: {
@@ -64,14 +63,11 @@ exports.getPosts = async (req, res) => {
         },
         ...aggregatePipe,
       ];
-      posts = await Post.aggregate(
-        _expand == "user" ? aggregatePipe : aggregatePipe.slice(0, 5)
-      );
-    } else {
-      posts = await Post.aggregate(
-        _expand == "user" ? aggregatePipe : aggregatePipe.slice(0, 5)
-      );
+      // posts = await Post.aggregate(
+      //   _expand == "user" ? aggregatePipe : aggregatePipe.slice(0, 5)
+      // );
     }
+    let posts = await Post.aggregate(aggregatePipe);
 
     res.status(200).json({ posts });
   } catch (err) {
@@ -106,19 +102,39 @@ exports.reactPost = async (req, res) => {
     const { postId } = req.params;
     const { reaction } = req.body;
 
-    if (reaction == REACTIONS.LIKE) {
+    if (reaction !== REACTIONS.UNLIKE) {
       await Post.updateOne(
         { _id: postId },
-        { $addToSet: { likes: req.userId } }
+        {
+          $pull: {
+            likes: { userId: req.userId },
+          },
+        }
       );
-    } else if (reaction == REACTIONS.UNLIKE) {
-      await Post.updateOne({ _id: postId }, { $pull: { likes: req.userId } });
+      await Post.updateOne(
+        { _id: postId },
+        {
+          $addToSet: {
+            likes: {
+              userId: req.userId,
+              reactionType: reaction,
+            },
+          },
+        }
+      );
     } else {
-      return res.status(400).json({ message: "can only like or unlike" });
+      await Post.updateOne(
+        { _id: postId },
+        {
+          $pull: {
+            likes: { userId: req.userId },
+          },
+        }
+      );
     }
 
     // firebase notifications
-    if (reaction == REACTIONS.LIKE) {
+    if (reaction !== REACTIONS.UNLIKE) {
       // returns  { likes, token }
       const likes = await Post.aggregate(getCountLikesPosts(postId));
       sendMessageOnLikePost(likes[0], req.username, postId);

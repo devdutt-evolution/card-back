@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { LikeSchema } = require("./comment");
 
 const PostSchema = new mongoose.Schema(
   {
@@ -15,12 +16,12 @@ const PostSchema = new mongoose.Schema(
     publishAt: {
       type: Number,
     },
-    likes: {
+    taggedUsers: {
       type: Array,
       default: [],
     },
-    taggedUsers: {
-      type: Array,
+    likes: {
+      type: [LikeSchema],
       default: [],
     },
   },

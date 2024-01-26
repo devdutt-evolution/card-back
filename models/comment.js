@@ -1,4 +1,14 @@
 const mongoose = require("mongoose");
+const { REACTIONS } = require("../utils/consts");
+
+const LikeSchema = new mongoose.Schema({
+  userId: String,
+  reactionType: {
+    type: String,
+    enum: [...Object.values(REACTIONS).filter((v) => v !== "unlike")],
+    default: "heart",
+  },
+});
 
 const CommentSchema = new mongoose.Schema(
   {
@@ -24,7 +34,7 @@ const CommentSchema = new mongoose.Schema(
       default: [],
     },
     likes: {
-      type: Array,
+      type: [LikeSchema],
       default: [],
     },
   },
@@ -32,4 +42,4 @@ const CommentSchema = new mongoose.Schema(
 );
 
 const Comment = mongoose.model("Comment", CommentSchema);
-module.exports = { Comment };
+module.exports = { Comment, LikeSchema };

@@ -41,30 +41,41 @@ exports.createComment = async (req, res) => {
 
 exports.reactComment = async (req, res) => {
   try {
-    const { reaction } = req.body;
     const { commentId } = req.params;
+    const { reaction } = req.body;
 
-    if (reaction == REACTIONS.LIKE) {
-      await Comment.updateOne(
-        { _id: commentId },
-        {
-          $addToSet: {
-            likes: req.userId,
-          },
-        }
-      );
-    } else if (reaction == REACTIONS.UNLIKE) {
+    if (reaction !== REACTIONS.UNLIKE) {
       await Comment.updateOne(
         { _id: commentId },
         {
           $pull: {
-            likes: req.userId,
+            likes: { userId: req.userId },
           },
         }
       );
-    } else return res.status(400).json({ message: "can only like or unlike" });
+      await Comment.updateOne(
+        { _id: commentId },
+        {
+          $addToSet: {
+            likes: {
+              userId: req.userId,
+              reactionType: reaction,
+            },
+          },
+        }
+      );
+    } else {
+      await Comment.updateOne(
+        { _id: commentId },
+        {
+          $pull: {
+            likes: { userId: req.userId },
+          },
+        }
+      );
+    }
 
-    if (reaction == REACTIONS.LIKE) {
+    if (reaction !== REACTIONS.UNLIKE) {
       const likes = await Comment.aggregate(getCountLikesComments(commentId));
       sendMessageOnLikeComment(likes[0], req.username, commentId);
     }
