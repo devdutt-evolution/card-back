@@ -37,6 +37,51 @@ exports.getUsers = async (req, res) => {
   }
 };
 
+exports.editProfile = async (req, res) => {
+  try {
+    const {
+      name,
+      phone,
+      website,
+      address: { city, street, suite, zipcode },
+      company: { name: companyName, bs, catchPhrase },
+    } = req.body;
+
+    const { userId } = req.params;
+    // if user does not owe the account
+    if (userId.toString() !== req.userId)
+      return res
+        .status(403)
+        .json({ message: "You can only edit your profile" });
+
+    const payload = {
+      name,
+      phone,
+      website,
+      address: {
+        street,
+        suite,
+        city,
+        zipcode,
+      },
+      company: {
+        name: companyName,
+        catchPhrase,
+        bs,
+      },
+    };
+
+    if (req?.file) Object.assign(payload, { picture: req.file?.originalname });
+
+    await User.updateOne({ _id: userId }, payload);
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+};
+
 exports.registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;

@@ -11,17 +11,24 @@ require("dotenv").config({ path: resolve(__dirname, "./.env") });
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use("/", logger, router);
+
+app.listen(3001, (err, data) => {
+  if (err) console.error(err);
+  console.log("Server up on 3001");
+  require("./cron");
+});
 
 mongoose
   .connect(process.env.DB_URL)
   .then((data) => {
     console.log("connected DB");
-    app.listen(3001, (err, data) => {
-      if (err) console.error(err);
-      console.log("Server up on 3001");
-      require("./cron");
-    });
+    // app.listen(3001, (err, data) => {
+    //   if (err) console.error(err);
+    //   console.log("Server up on 3001");
+    //   require("./cron");
+    // });
     swaggerDocs(app, 3001);
   })
   .catch((err) => console.log(err));
