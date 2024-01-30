@@ -15,7 +15,7 @@ router.post(
 );
 router.post(
   "/signin",
-  validateLogin.validateLogin,
+  userValidator.validateLogin,
   validate,
   userHandler.login
 );
@@ -29,7 +29,7 @@ router.put(
   "/user/:userId",
   checkAuth,
   [...middlewares],
-  validateLogin.validateEditProfile,
+  userValidator.validateEditProfile,
   userHandler.editProfile
 );
 
