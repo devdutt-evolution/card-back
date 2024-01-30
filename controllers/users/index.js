@@ -2,6 +2,7 @@ const { User } = require("../../models/user");
 const {
   defaultSuggestionPipeline,
   getSuggestionPipeline,
+  getUsersWithRecentPosts,
 } = require("../../utils/aggregatePipelines");
 const { hashIt, pass } = require("../../utils/secure");
 
@@ -9,12 +10,10 @@ exports.getUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const user = await User.findOne(
-      { _id: userId },
-      { createdAt: 0, updatedAt: 0, __v: 0 }
-    ).lean();
+    const user = await User.aggregate(getUsersWithRecentPosts(userId, req.userId));
+    if (user.length == 0) return res.sendStatus(404);
 
-    res.json({ user });
+    res.json({ user: user[0] });
   } catch (err) {
     console.log(err);
     res.sendStatus(500);

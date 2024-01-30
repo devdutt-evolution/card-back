@@ -11,6 +11,7 @@ const {
   getLikes,
   getCountLikesPosts,
 } = require("../../utils/aggregatePipelines");
+const { default: mongoose } = require("mongoose");
 
 exports.createPost = async (req, res) => {
   try {
@@ -41,7 +42,7 @@ exports.createPost = async (req, res) => {
 
 exports.getPosts = async (req, res) => {
   try {
-    let { _q, _limit, _page, _sort, _order, _expand } = req.query;
+    let { _q, _limit, _page, _sort, _order, _userId } = req.query;
     let option = {};
 
     _q = _q || "";
@@ -54,7 +55,7 @@ exports.getPosts = async (req, res) => {
 
     let aggregatePipe = getPostsPipeline(req.userId, option, _page, _limit);
 
-    if (_q || _q != "") {
+    if (_q && _q != "") {
       aggregatePipe = [
         {
           $match: {
@@ -66,6 +67,16 @@ exports.getPosts = async (req, res) => {
       // posts = await Post.aggregate(
       //   _expand == "user" ? aggregatePipe : aggregatePipe.slice(0, 5)
       // );
+    } else if (_userId && _userId !== "") {
+      aggregatePipe.splice(3, 2);
+      aggregatePipe = [
+        {
+          $match: {
+            userId: new mongoose.Types.ObjectId(_userId),
+          },
+        },
+        ...aggregatePipe,
+      ];
     }
     let posts = await Post.aggregate(aggregatePipe);
 

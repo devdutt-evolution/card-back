@@ -452,4 +452,86 @@ module.exports = {
       },
     },
   ],
+  /**
+   * get users details with his/her's 3 recent posts
+   * @param {string} userId user of to get details of
+   * @returns aggregate pipeline
+   */
+  getUsersWithRecentPosts: (userId, searchUserId) => [
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(userId),
+      },
+    },
+    {
+      $lookup: {
+        from: "posts",
+        localField: "_id",
+        foreignField: "userId",
+        as: "posts",
+        pipeline: [
+          {
+            $sort: {
+              createdAt: -1,
+            },
+          },
+          {
+            $limit: 3,
+          },
+          {
+            $project: {
+              createdAt: 0,
+              updatedAt: 0,
+              userId: 0,
+              taggedUsers: 0,
+            },
+          },
+          {
+            $lookup: {
+              from: "comments",
+              localField: "_id",
+              foreignField: "postId",
+              as: "comments",
+            },
+          },
+          {
+            $addFields: {
+              userLike: {
+                $filter: {
+                  input: "$likes",
+                  as: "like",
+                  cond: {
+                    $eq: [
+                      "$$like.userId",
+                      searchUserId,
+                    ],
+                  },
+                },
+              },
+              likes: {
+                $size: "$likes",
+              },
+              comments: {
+                $size: "$comments",
+              },
+            },
+          },
+          {
+            $unwind: {
+              path: "$userLike",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        createdAt: 0,
+        updatedAt: 0,
+        token: 0,
+        hash: 0,
+      },
+    },
+  ],
 };
