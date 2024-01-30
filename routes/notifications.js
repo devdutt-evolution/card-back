@@ -1,12 +1,9 @@
 const router = require("express").Router();
 const { checkAuth } = require("../controllers/auth");
-const {
-  getNotifications,
-  markNotificationSeen,
-} = require("../controllers/notifications");
+const notificationHandler = require("../controllers/notifications");
 
 // notification
-router.get("/", checkAuth, getNotifications);
-router.put("/", checkAuth, markNotificationSeen);
+router.get("/", checkAuth, notificationHandler.getNotifications);
+router.put("/", checkAuth, notificationHandler.markNotificationSeen);
 
 module.exports = router;

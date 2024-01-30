@@ -7,15 +7,9 @@ const PostSchema = new mongoose.Schema(
       type: mongoose.SchemaTypes.ObjectId,
       ref: "User",
     },
-    title: {
-      type: String,
-    },
-    body: {
-      type: String,
-    },
-    publishAt: {
-      type: Number,
-    },
+    title: String,
+    body: String,
+    publishAt: Number,
     taggedUsers: {
       type: Array,
       default: [],

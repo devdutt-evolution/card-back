@@ -1,33 +1,29 @@
 const router = require("express").Router();
-const {
-  getPost,
-  getPosts,
-  createPost,
-  getLikes,
-  reactPost,
-} = require("../controllers/posts");
-const { createComment } = require("../controllers/posts/comment");
-const {
-  validateCommentBody,
-  validatePostBody,
-  handlePostId,
-} = require("../controllers/posts/validator");
+const postHandler = require("../controllers/posts");
+const commentHandler = require("../controllers/posts/comment");
+const postValidator = require("../controllers/posts/validator");
 const { validate } = require("../utils/validator");
 const { checkAuth } = require("../controllers/auth");
 
-router.post("/", checkAuth, validatePostBody, validate, createPost);
-router.get("/", checkAuth, getPosts);
+router.post(
+  "/",
+  checkAuth,
+  postValidator.validatePostBody,
+  validate,
+  postHandler.createPost
+);
+router.get("/", checkAuth, postHandler.getPosts);
 
-router.param("postId", handlePostId);
-router.get("/:postId", checkAuth, getPost);
-router.get("/:postId/likes", checkAuth, getLikes);
-router.put("/:postId/react", checkAuth, reactPost);
+router.param("postId", postValidator.handlePostId);
+router.get("/:postId", checkAuth, postHandler.getPost);
+router.get("/:postId/likes", checkAuth, postHandler.getLikes);
+router.put("/:postId/react", checkAuth, postHandler.reactPost);
 router.post(
   "/:postId/comment",
   checkAuth,
-  validateCommentBody,
+  postValidator.validateCommentBody,
   validate,
-  createComment
+  commentHandler.createComment
 );
 
 module.exports = router;

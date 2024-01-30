@@ -6,15 +6,9 @@ const NotificationSchema = new mongoose.Schema(
       type: mongoose.SchemaTypes.ObjectId,
       ref: "User",
     },
-    title: {
-      type: String,
-    },
-    description: {
-      type: String,
-    },
-    url: {
-      type: String,
-    },
+    title: String,
+    description: String,
+    url: String,
     seen: {
       type: Boolean,
       default: false,

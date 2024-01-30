@@ -5,8 +5,8 @@ const LikeSchema = new mongoose.Schema({
   userId: String,
   reactionType: {
     type: String,
-    enum: [...Object.values(REACTIONS).filter((v) => v !== "unlike")],
-    default: "heart",
+    enum: [...Object.values(REACTIONS).filter((v) => v !== REACTIONS.UNLIKE)],
+    default: REACTIONS.HEART,
   },
 });
 
@@ -20,15 +20,9 @@ const CommentSchema = new mongoose.Schema(
       type: mongoose.SchemaTypes.ObjectId,
       ref: "User",
     },
-    name: {
-      type: String,
-    },
-    email: {
-      type: String,
-    },
-    body: {
-      type: String,
-    },
+    name: String,
+    email: String,
+    body: String,
     taggedUsers: {
       type: Array,
       default: [],
