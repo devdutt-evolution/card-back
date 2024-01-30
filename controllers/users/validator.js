@@ -72,26 +72,4 @@ exports.validateEditProfile = [
     .checkForPlus()
     .isInt()
     .withMessage("alphabates or special chars are not allowed in phone number"),
-  body("website").isURL().withMessage("website link should be a valid URL"),
-  body("address.city")
-    .isAlpha()
-    .withMessage("city name should only contain english alphabates"),
-  body("address.street")
-    .isAlphanumeric()
-    .withMessage("street name should not contain special characters"),
-  body("address.suite")
-    .isAlphanumeric()
-    .withMessage("address suite should not contain special characters"),
-  body("address.zipcode")
-    .isInt()
-    .withMessage("zipcode should be only contain numbers"),
-  body("company.name")
-    .isAlphanumeric()
-    .withMessage("company name should not contain special characters"),
-  body("company.bs")
-    .isAlphanumeric()
-    .withMessage("company bs should not contain special characters"),
-  body("company.catchPhrase")
-    .isAlphanumeric()
-    .withMessage("company catchPhrase should not contain special characters"),
 ];
