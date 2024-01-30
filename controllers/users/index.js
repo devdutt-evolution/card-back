@@ -71,7 +71,7 @@ exports.editProfile = async (req, res) => {
       },
     };
 
-    if (req?.file) Object.assign(payload, { picture: req.file?.originalname });
+    if (req?.file) Object.assign(payload, { picture: req.file?.filename });
 
     await User.updateOne({ _id: userId }, payload);
 
@@ -99,7 +99,10 @@ exports.login = async (req, res) => {
   try {
     const { email, password, fcmToken } = req.body;
 
-    let user = await User.findOne({ email }, { hash: 1, username: 1 });
+    let user = await User.findOne(
+      { email },
+      { hash: 1, username: 1, picture: 1 }
+    );
 
     if (hashIt(password) == user.hash) {
       res.status(200).json({
@@ -110,7 +113,8 @@ exports.login = async (req, res) => {
         }),
         id: user._id,
         name: user.username,
-        email: email,
+        email,
+        picture: user.picture,
       });
     } else {
       res.status(401).json({ message: "email and password does not match" });
