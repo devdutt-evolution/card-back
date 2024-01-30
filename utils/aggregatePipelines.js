@@ -291,6 +291,7 @@ module.exports = {
       $project: {
         id: "$_id",
         display: "$name",
+        picture: "$picture",
         _id: 0,
       },
     },
@@ -325,6 +326,7 @@ module.exports = {
       $project: {
         id: "$_id",
         display: "$name",
+        picture: "$picture",
         _id: 0,
       },
     },
