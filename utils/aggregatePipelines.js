@@ -156,6 +156,9 @@ module.exports = {
         as: "comments",
         pipeline: [
           {
+            $sort: { createdAt: -1 },
+          },
+          {
             $project: {
               name: 1,
               email: 1,
@@ -182,9 +185,6 @@ module.exports = {
               path: "$userLike",
               preserveNullAndEmptyArrays: true,
             },
-          },
-          {
-            $sort: { numberOfLikes: -1 },
           },
         ],
       },
@@ -501,10 +501,7 @@ module.exports = {
                   input: "$likes",
                   as: "like",
                   cond: {
-                    $eq: [
-                      "$$like.userId",
-                      searchUserId,
-                    ],
+                    $eq: ["$$like.userId", searchUserId],
                   },
                 },
               },
