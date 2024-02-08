@@ -20,8 +20,7 @@ const CommentSchema = new mongoose.Schema(
       type: mongoose.SchemaTypes.ObjectId,
       ref: "User",
     },
-    name: String,
-    email: String,
+    username: String,
     body: String,
     taggedUsers: {
       type: Array,

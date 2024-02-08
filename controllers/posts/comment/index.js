@@ -21,8 +21,7 @@ exports.createComment = async (req, res) => {
     const tags = getTagsFromComment(comment) || [];
 
     const createdComment = await Comment.create({
-      name: req.username,
-      email: req.email,
+      username: req.username,
       body: comment,
       taggedUsers: tags,
       postId,

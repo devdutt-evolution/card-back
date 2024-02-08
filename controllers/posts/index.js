@@ -91,7 +91,7 @@ exports.getPost = async (req, res) => {
   try {
     const { postId } = req.params;
 
-    let post = await Post.aggregate(getPostPipeline(postId, req.userId));
+    const post = await Post.aggregate(getPostPipeline(postId, req.userId));
 
     res.json({ post: post[0] });
   } catch (err) {

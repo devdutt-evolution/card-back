@@ -160,8 +160,7 @@ module.exports = {
           },
           {
             $project: {
-              name: 1,
-              email: 1,
+              username: 1,
               body: 1,
               numberOfLikes: {
                 $size: "$likes",
