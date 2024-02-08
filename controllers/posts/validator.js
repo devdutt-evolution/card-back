@@ -33,12 +33,7 @@ exports.validatePostBody = [
 ];
 
 exports.validateCommentBody = [
-  body("comment")
-    .notEmpty()
-    .withMessage("comment is required")
-    .isString()
-    .isLength(15)
-    .withMessage("comment is should be atleast 15 characters long"),
+  body("comment").notEmpty().withMessage("comment is required").isString(),
 ];
 
 exports.handlePostId = (req, res, next, postId) => {
