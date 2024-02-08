@@ -160,6 +160,7 @@ module.exports = {
           },
           {
             $project: {
+              userId: 1,
               username: 1,
               body: 1,
               numberOfLikes: {
