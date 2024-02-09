@@ -29,6 +29,7 @@ const ReplySchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
+// middleware 
 ReplySchema.post("save", async function () {
   const { Comment } = require("../models/comment");
 

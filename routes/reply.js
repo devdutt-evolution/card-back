@@ -12,4 +12,6 @@ router.post(
   replyHandler.createReply
 );
 
+router.get("/:commentId", checkAuth, replyHandler.getReplies);
+
 module.exports = router;

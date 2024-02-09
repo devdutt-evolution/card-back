@@ -162,7 +162,9 @@ module.exports = {
             $project: {
               userId: 1,
               username: 1,
-              replies: 1,
+              replies: {
+                $size: "$replies",
+              },
               body: 1,
               numberOfLikes: {
                 $size: "$likes",
