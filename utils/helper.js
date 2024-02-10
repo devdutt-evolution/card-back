@@ -75,16 +75,27 @@ exports.getTagsFromComment = (comment) => {
  * @param {string} username username of user who tagged
  * @param {string} postId post's unique ID in which user is tagged
  * @param {?string} commentId comment's unique ID if tagged in comment
+ * @param {?string} replyId reply's unique ID if tagged in reply
  * @returns void
  */
-exports.sendMessages = async (tags, type, username, postId, commentId) => {
+exports.sendMessages = async (
+  tags,
+  type,
+  username,
+  postId,
+  commentId,
+  replyId
+) => {
   if (!tags || tags.length == 0) return;
 
   const title = `Tagged in ${type}`;
   const body = `You have been mentioned in ${type} by ${username}.`;
-  let url = !commentId
-    ? `${process.env.FRONT_END}/post/${postId}`
-    : `${process.env.FRONT_END}/post/${postId}#${commentId}`;
+  const url =
+    type === "post"
+      ? `${process.env.FRONT_END}/post/${postId}`
+      : type === "comment"
+      ? `${process.env.FRONT_END}/post/${postId}?commentId=${commentId}`
+      : `${process.env.FRONT_END}/post/${postId}?commentId=${commentId}&replyId=${replyId}`;
 
   // saving notifications
   const payload = tags.map((tagObj) => {
@@ -92,7 +103,12 @@ exports.sendMessages = async (tags, type, username, postId, commentId) => {
       userId: tagObj.id,
       title,
       description: body,
-      url: !commentId ? `/post/${postId}` : `/post/${postId}#${commentId}`,
+      url:
+        type === "post"
+          ? `/post/${postId}`
+          : type === "comment"
+          ? `/post/${postId}?commentId=${commentId}`
+          : `/post/${postId}?commentId=${commentId}&replyId=${replyId}`,
     };
   });
 

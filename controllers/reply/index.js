@@ -8,7 +8,7 @@ exports.createReply = async (req, res) => {
 
     const tags = getTagsFromComment(comment) || [];
 
-    const createdComment = await Reply.create({
+    const createdReply = await Reply.create({
       postId,
       commentId,
       userId: req.userId,
@@ -20,7 +20,14 @@ exports.createReply = async (req, res) => {
     res.sendStatus(201);
 
     // send fcm and save it in DB
-    sendMessages(tags, "comment", req.username, postId, createdComment._id);
+    sendMessages(
+      tags,
+      "reply",
+      req.username,
+      postId,
+      commentId,
+      createdReply._id
+    );
   } catch (err) {
     console.error(err);
     res.sendStatus(500);
