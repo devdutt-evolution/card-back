@@ -122,7 +122,47 @@
  *      400:
  *        description: Invalid body
  *      401:
- *        description: Not Authorised
+ *        description: Not Authorized
+ *      500:
+ *        description: Server Error
+ */
+
+/**
+ * @openapi
+ * '/posts/{postId}':
+ *  put:
+ *     tags:
+ *     - Posts
+ *     parameters:
+ *     - in: path
+ *       required: true
+ *       name: postId
+ *     security:
+ *     - bearerAuth: []
+ *     summary: Update Post
+ *     requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *           schema:
+ *            type: object
+ *            required:
+ *              - title
+ *              - body
+ *            properties:
+ *              title:
+ *                type: string
+ *                default: title of the post
+ *              body:
+ *                type: string
+ *                default: Body of the post \n Mention some one with '@'
+ *     responses:
+ *      200:
+ *        description: Updated
+ *      400:
+ *        description: Invalid body
+ *      401:
+ *        description: Not Authorized
  *      500:
  *        description: Server Error
  */

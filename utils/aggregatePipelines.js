@@ -28,6 +28,7 @@ module.exports = {
         title: 1,
         body: 1,
         publishAt: 1,
+        isEdited: { $ifNull: ["$isEdited", false] },
         numberOfLikes: {
           $size: "$likes",
         },
@@ -198,6 +199,7 @@ module.exports = {
         user: 1,
         title: 1,
         body: 1,
+        isEdited: { $ifNull: ["$isEdited", false] },
         comments: 1,
         likedByUser: {
           $in: [userId, "$likes.userId"],

@@ -15,6 +15,7 @@ router.post(
 router.get("/", checkAuth, postHandler.getPosts);
 
 router.param("postId", postValidator.handlePostId);
+router.put("/:postId", checkAuth, postHandler.updatePost);
 router.get("/:postId", checkAuth, postHandler.getPost);
 router.get("/:postId/likes", checkAuth, postHandler.getLikes);
 router.put("/:postId/react", checkAuth, postHandler.reactPost);

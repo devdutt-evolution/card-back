@@ -100,6 +100,35 @@ exports.getPost = async (req, res) => {
   }
 };
 
+exports.updatePost = async (req, res) => {
+  try {
+    const { title, body } = req.body;
+
+    const [tags, post] = getTagsFromPost(body);
+
+    const postObject = {
+      title,
+      body: post,
+      isEdited: true,
+      userId: req.userId,
+      taggedUsers: tags,
+    };
+
+    const editedPost = await Post.findOneAndUpdate(
+      { _id: req.params.postId, userId: req.userId },
+      postObject
+    );
+
+    if (!editedPost)
+      return res.status(404).json({ message: "Could not find the post" });
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+};
+
 exports.getLikes = async (req, res) => {
   const { postId } = req.params;
 

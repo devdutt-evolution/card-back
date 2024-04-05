@@ -10,6 +10,10 @@ const PostSchema = new mongoose.Schema(
     title: String,
     body: String,
     publishAt: Number,
+    isEdited: {
+      type: Boolean,
+      default: false,
+    },
     taggedUsers: {
       type: Array,
       default: [],
