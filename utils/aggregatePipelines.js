@@ -23,6 +23,16 @@ module.exports = {
       },
     },
     {
+      $sort: option,
+    },
+    {
+      $skip: (parseInt(_page) - 1) * parseInt(_limit),
+    },
+    {
+      $limit: parseInt(_limit),
+    },
+
+    {
       $project: {
         userId: 1,
         title: 1,
@@ -42,15 +52,6 @@ module.exports = {
           },
         },
       },
-    },
-    {
-      $sort: option,
-    },
-    {
-      $skip: (parseInt(_page) - 1) * parseInt(_limit),
-    },
-    {
-      $limit: parseInt(_limit),
     },
     {
       $lookup: {

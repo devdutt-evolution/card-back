@@ -48,10 +48,10 @@ exports.getPosts = async (req, res) => {
     _q = _q || "";
     _limit = _limit || "10";
     _page = _page || "1";
-    _sort = _sort || "title";
-    _order = _order || "asc";
+    _sort = _sort || "createdAt";
+    _order = _order || "desc";
 
-    option[_sort] = _order == "asc" ? 1 : -1;
+    option[_sort] = _order === "asc" ? 1 : -1;
 
     let aggregatePipe = getPostsPipeline(req.userId, option, _page, _limit);
 
