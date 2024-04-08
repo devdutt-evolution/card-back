@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema(
     phone: String,
     picture: String,
     email: String,
+    admin: Boolean,
   },
   { timestamps: true, versionKey: false }
 );

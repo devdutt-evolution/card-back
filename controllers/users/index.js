@@ -81,14 +81,15 @@ exports.login = async (req, res) => {
 
     const user = await User.findOne(
       { email },
-      { hash: 1, username: 1, picture: 1 }
+      { hash: 1, username: 1, picture: 1, admin: 1 }
     );
 
-    if (hashIt(password) == user.hash) {
+    if (hashIt(password) === user.hash) {
       const token = pass({
         _id: user._id,
         email,
         username: user.username,
+        admin: true,
       });
 
       const authData = {
@@ -98,6 +99,10 @@ exports.login = async (req, res) => {
         picture: user.picture,
         token,
       };
+
+      if (user.admin) {
+        Object.assign(authData, { admin: true });
+      }
 
       res.status(200).json(authData);
     } else {
