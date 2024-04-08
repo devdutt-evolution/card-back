@@ -1,4 +1,5 @@
 const { Post } = require("../../models/post");
+const { Report } = require("../../models/reported");
 const { REACTIONS } = require("../../utils/consts");
 const {
   getTagsFromPost,
@@ -181,6 +182,25 @@ exports.reactPost = async (req, res) => {
     }
 
     res.sendStatus(200);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+};
+
+exports.reportPost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.postId);
+
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    await Report.create({
+      postId: req.params.postId,
+      userId: req.userId,
+      reason: req.body?.reason,
+    });
+
+    return res.status(200);
   } catch (err) {
     console.log(err);
     res.sendStatus(500);

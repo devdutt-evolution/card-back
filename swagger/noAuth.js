@@ -14,6 +14,7 @@
  *            required:
  *              - email
  *              - password
+ *              - fcmToken
  *            properties:
  *              email:
  *                type: string
@@ -21,6 +22,9 @@
  *              password:
  *                type: string
  *                default: password
+ *              fcmToken:
+ *                type: string
+ *                default: anything
  *     responses:
  *      200:
  *        description: Success

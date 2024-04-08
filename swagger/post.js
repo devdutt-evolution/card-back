@@ -87,6 +87,41 @@
 
 /**
  * @openapi
+ * '/posts/{postId}/report':
+ *  post:
+ *     tags:
+ *     - Posts
+ *     parameters:
+ *     - in: path
+ *       required: true
+ *       name: postId
+ *       schema:
+ *         type: string
+ *       description: postId of post
+ *     security:
+ *     - bearerAuth: []
+ *     summary: report post
+ *     requestBody:
+ *      required: false
+ *      content:
+ *        application/json:
+ *           schema:
+ *            type: object
+ *            properties:
+ *              reason:
+ *                type: string
+ *                default: reason to report
+ *     responses:
+ *      200:
+ *        description: Success
+ *      404:
+ *        description: Post not found
+ *      500:
+ *        description: Server Error
+ */
+
+/**
+ * @openapi
  * '/posts':
  *  post:
  *     tags:
