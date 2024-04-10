@@ -1,20 +1,20 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const ReportedSchema = new mongoose.Schema(
   {
     postId: {
       type: mongoose.SchemaTypes.ObjectId,
-      ref: "Post",
+      ref: 'Post',
     },
     userId: {
       type: mongoose.SchemaTypes.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
     reason: String,
   },
-  { timestamps: true, versionKey: false }
+  { timestamps: true, versionKey: false, name: 'reports' }
 );
-ReportedSchema.index("postId", { unique: false, name: "postwise" });
+ReportedSchema.index('postId', { unique: false, name: 'postwise' });
 
-const Reported = mongoose.model("Reported", ReportedSchema);
+const Reported = mongoose.model('Reported', ReportedSchema);
 module.exports = { Reported };

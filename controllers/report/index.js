@@ -1,12 +1,12 @@
-const { Post } = require("../../models/post");
-const { Reported } = require("../../models/reported");
-const { sendMessages } = require("../../utils/helper");
+const { Post } = require('../../models/post');
+const { Reported } = require('../../models/reported');
+const { getReportedPosts } = require('../../utils/aggregatePipelines');
 
 exports.reportPost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
 
-    if (!post) return res.status(404).json({ message: "Post not found" });
+    if (!post) return res.status(404).json({ message: 'Post not found' });
 
     await Reported.create({
       postId: req.params.postId,
@@ -23,17 +23,9 @@ exports.reportPost = async (req, res) => {
 
 exports.getReported = async (req, res) => {
   try {
-    res.sendStatus(201);
+    const posts = await Reported.aggregate(getReportedPosts());
 
-    // send fcm and save it in DB
-    sendMessages(
-      tags,
-      "reply",
-      req.username,
-      postId,
-      commentId,
-      createdReply._id
-    );
+    res.status(200).json({ posts });
   } catch (err) {
     console.error(err);
     res.sendStatus(500);
@@ -42,17 +34,17 @@ exports.getReported = async (req, res) => {
 
 exports.deleteReportedPost = async (req, res) => {
   try {
-    res.sendStatus(201);
+    const { postId } = req.params;
 
-    // send fcm and save it in DB
-    sendMessages(
-      tags,
-      "reply",
-      req.username,
-      postId,
-      commentId,
-      createdReply._id
-    );
+    const post = await Post.findByIdAndUpdate(postId, {
+      deleted: true,
+    });
+
+    if (!post) return res.status(404).json({ message: 'No such post found' });
+    // remove reports of that specific postId
+    Reported.deleteMany({ postId }).then().catch();
+
+    res.sendStatus(200);
   } catch (err) {
     console.error(err);
     res.sendStatus(500);
@@ -61,17 +53,11 @@ exports.deleteReportedPost = async (req, res) => {
 
 exports.discardReport = async (req, res) => {
   try {
-    res.sendStatus(201);
+    const { postId } = req.params;
 
-    // send fcm and save it in DB
-    sendMessages(
-      tags,
-      "reply",
-      req.username,
-      postId,
-      commentId,
-      createdReply._id
-    );
+    await Reported.deleteMany({ postId });
+
+    res.sendStatus(200);
   } catch (err) {
     console.error(err);
     res.sendStatus(500);

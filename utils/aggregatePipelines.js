@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 module.exports = {
   /**
@@ -38,16 +38,16 @@ module.exports = {
         title: 1,
         body: 1,
         publishAt: 1,
-        isEdited: { $ifNull: ["$isEdited", false] },
+        isEdited: { $ifNull: ['$isEdited', false] },
         numberOfLikes: {
-          $size: "$likes",
+          $size: '$likes',
         },
         userLike: {
           $filter: {
-            input: "$likes",
-            as: "like",
+            input: '$likes',
+            as: 'like',
             cond: {
-              $eq: ["$$like.userId", userId],
+              $eq: ['$$like.userId', userId],
             },
           },
         },
@@ -55,10 +55,10 @@ module.exports = {
     },
     {
       $lookup: {
-        from: "comments",
-        localField: "_id",
-        foreignField: "postId",
-        as: "commentCount",
+        from: 'comments',
+        localField: '_id',
+        foreignField: 'postId',
+        as: 'commentCount',
         pipeline: [
           {
             $project: {
@@ -71,16 +71,16 @@ module.exports = {
     {
       $addFields: {
         commentCount: {
-          $size: "$commentCount",
+          $size: '$commentCount',
         },
       },
     },
     {
       $lookup: {
-        from: "users",
-        localField: "userId",
-        foreignField: "_id",
-        as: "user",
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'user',
         pipeline: [
           {
             $project: {
@@ -94,7 +94,7 @@ module.exports = {
     },
     {
       $unwind: {
-        path: "$user",
+        path: '$user',
       },
     },
     {
@@ -102,7 +102,7 @@ module.exports = {
         likedByUser: {
           $gt: [
             {
-              $size: "$userLike",
+              $size: '$userLike',
             },
             0,
           ],
@@ -111,7 +111,7 @@ module.exports = {
     },
     {
       $unwind: {
-        path: "$userLike",
+        path: '$userLike',
         preserveNullAndEmptyArrays: true,
       },
     },
@@ -130,10 +130,10 @@ module.exports = {
     },
     {
       $lookup: {
-        from: "users",
-        localField: "userId",
-        foreignField: "_id",
-        as: "user",
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'user',
         pipeline: [
           {
             $project: {
@@ -147,15 +147,15 @@ module.exports = {
     },
     {
       $unwind: {
-        path: "$user",
+        path: '$user',
       },
     },
     {
       $lookup: {
-        from: "comments",
-        localField: "_id",
-        foreignField: "postId",
-        as: "comments",
+        from: 'comments',
+        localField: '_id',
+        foreignField: 'postId',
+        as: 'comments',
         pipeline: [
           {
             $sort: { createdAt: -1 },
@@ -165,21 +165,21 @@ module.exports = {
               userId: 1,
               username: 1,
               replies: {
-                $size: "$replies",
+                $size: '$replies',
               },
               body: 1,
               numberOfLikes: {
-                $size: "$likes",
+                $size: '$likes',
               },
               likedByUser: {
-                $in: [userId, "$likes.userId"],
+                $in: [userId, '$likes.userId'],
               },
               userLike: {
                 $filter: {
-                  input: "$likes",
-                  as: "like",
+                  input: '$likes',
+                  as: 'like',
                   cond: {
-                    $eq: ["$$like.userId", userId],
+                    $eq: ['$$like.userId', userId],
                   },
                 },
               },
@@ -187,7 +187,7 @@ module.exports = {
           },
           {
             $unwind: {
-              path: "$userLike",
+              path: '$userLike',
               preserveNullAndEmptyArrays: true,
             },
           },
@@ -200,23 +200,23 @@ module.exports = {
         user: 1,
         title: 1,
         body: 1,
-        isEdited: { $ifNull: ["$isEdited", false] },
+        isEdited: { $ifNull: ['$isEdited', false] },
         comments: 1,
         likedByUser: {
-          $in: [userId, "$likes.userId"],
+          $in: [userId, '$likes.userId'],
         },
         numberOfLikes: {
-          $size: "$likes",
+          $size: '$likes',
         },
         commentCount: {
-          $size: "$comments",
+          $size: '$comments',
         },
         userLike: {
           $filter: {
-            input: "$likes",
-            as: "like",
+            input: '$likes',
+            as: 'like',
             cond: {
-              $eq: ["$$like.userId", userId],
+              $eq: ['$$like.userId', userId],
             },
           },
         },
@@ -224,7 +224,7 @@ module.exports = {
     },
     {
       $unwind: {
-        path: "$userLike",
+        path: '$userLike',
         preserveNullAndEmptyArrays: true,
       },
     },
@@ -243,27 +243,27 @@ module.exports = {
     },
     {
       $project: {
-        user: "$likes",
+        user: '$likes',
       },
     },
     {
       $unwind: {
-        path: "$user",
+        path: '$user',
       },
     },
     {
       $addFields: {
         userId: {
-          $toObjectId: "$user",
+          $toObjectId: '$user',
         },
       },
     },
     {
       $lookup: {
-        from: "users",
-        localField: "userId",
-        foreignField: "_id",
-        as: "user",
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'user',
         pipeline: [
           {
             $project: {
@@ -276,14 +276,14 @@ module.exports = {
     },
     {
       $unwind: {
-        path: "$user",
+        path: '$user',
       },
     },
     {
       $project: {
-        _id: "$user._id",
-        name: "$user.username",
-        email: "$user.email",
+        _id: '$user._id',
+        name: '$user.username',
+        email: '$user.email',
       },
     },
   ],
@@ -295,9 +295,9 @@ module.exports = {
   defaultSuggestionPipeline: () => [
     {
       $project: {
-        id: "$_id",
-        display: "$name",
-        picture: "$picture",
+        id: '$_id',
+        display: '$name',
+        picture: '$picture',
         _id: 0,
       },
     },
@@ -330,9 +330,9 @@ module.exports = {
     },
     {
       $project: {
-        id: "$_id",
-        display: "$name",
-        picture: "$picture",
+        id: '$_id',
+        display: '$name',
+        picture: '$picture',
         _id: 0,
       },
     },
@@ -355,17 +355,17 @@ module.exports = {
       },
       {
         $project: {
-          _id: "$token",
+          _id: '$token',
         },
       },
       {
         $group: {
-          _id: "$_id",
+          _id: '$_id',
         },
       },
       {
         $project: {
-          id: "$_id",
+          id: '$_id',
           _id: 0,
         },
       },
@@ -385,10 +385,10 @@ module.exports = {
     },
     {
       $lookup: {
-        from: "users",
-        localField: "userId",
-        foreignField: "_id",
-        as: "user",
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'user',
         pipeline: [
           {
             $project: {
@@ -400,16 +400,16 @@ module.exports = {
     },
     {
       $unwind: {
-        path: "$user",
+        path: '$user',
       },
     },
     {
       $project: {
         likes: {
-          $size: "$likes",
+          $size: '$likes',
         },
-        token: "$user.token",
-        userId: "$user._id",
+        token: '$user.token',
+        userId: '$user._id',
         _id: 0,
       },
     },
@@ -428,10 +428,10 @@ module.exports = {
     },
     {
       $lookup: {
-        from: "users",
-        localField: "userId",
-        foreignField: "_id",
-        as: "user",
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'user',
         pipeline: [
           {
             $project: {
@@ -443,17 +443,17 @@ module.exports = {
     },
     {
       $unwind: {
-        path: "$user",
+        path: '$user',
       },
     },
     {
       $project: {
         likes: {
-          $size: "$likes",
+          $size: '$likes',
         },
-        postId: "$postId",
-        token: "$user.token",
-        userId: "$user._id",
+        postId: '$postId',
+        token: '$user.token',
+        userId: '$user._id',
         _id: 0,
       },
     },
@@ -471,10 +471,10 @@ module.exports = {
     },
     {
       $lookup: {
-        from: "posts",
-        localField: "_id",
-        foreignField: "userId",
-        as: "posts",
+        from: 'posts',
+        localField: '_id',
+        foreignField: 'userId',
+        as: 'posts',
         pipeline: [
           {
             $sort: {
@@ -494,34 +494,34 @@ module.exports = {
           },
           {
             $lookup: {
-              from: "comments",
-              localField: "_id",
-              foreignField: "postId",
-              as: "comments",
+              from: 'comments',
+              localField: '_id',
+              foreignField: 'postId',
+              as: 'comments',
             },
           },
           {
             $addFields: {
               userLike: {
                 $filter: {
-                  input: "$likes",
-                  as: "like",
+                  input: '$likes',
+                  as: 'like',
                   cond: {
-                    $eq: ["$$like.userId", searchUserId],
+                    $eq: ['$$like.userId', searchUserId],
                   },
                 },
               },
               likes: {
-                $size: "$likes",
+                $size: '$likes',
               },
               comments: {
-                $size: "$comments",
+                $size: '$comments',
               },
             },
           },
           {
             $unwind: {
-              path: "$userLike",
+              path: '$userLike',
               preserveNullAndEmptyArrays: true,
             },
           },
@@ -534,6 +534,56 @@ module.exports = {
         updatedAt: 0,
         token: 0,
         hash: 0,
+      },
+    },
+  ],
+
+  /**
+   * Get reported posts recently reported first
+   * @returns getReportPipeline
+   */
+  getReportedPosts: () => [
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'user',
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+              name: 1,
+              picture: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $unwind: {
+        path: '$user',
+        preserveNullAndEmptyArrays: false,
+      },
+    },
+    {
+      $group: {
+        _id: '$postId',
+        reports: {
+          $push: {
+            reason: '$reason',
+            userId: '$userId',
+            user: '$user',
+          },
+        },
+        reportedCount: {
+          $count: {},
+        },
+      },
+    },
+    {
+      $sort: {
+        reportedCount: -1,
       },
     },
   ],
