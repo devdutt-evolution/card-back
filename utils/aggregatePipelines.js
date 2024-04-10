@@ -640,6 +640,27 @@ module.exports = {
             },
           },
           {
+            $lookup: {
+              from: 'users',
+              localField: 'userId',
+              foreignField: '_id',
+              as: 'user',
+              pipeline: [
+                {
+                  $project: {
+                    username: 1,
+                    name: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $unwind: {
+              path: '$user',
+            },
+          },
+          {
             $addFields: {
               likedByUser: {
                 $gt: [
