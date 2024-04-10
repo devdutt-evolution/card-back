@@ -23,7 +23,7 @@ exports.reportPost = async (req, res) => {
 
 exports.getReported = async (req, res) => {
   try {
-    const posts = await Reported.aggregate(getReportedPosts());
+    const posts = await Reported.aggregate(getReportedPosts(req.userId));
 
     res.status(200).json({ posts });
   } catch (err) {

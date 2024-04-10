@@ -20,6 +20,9 @@ module.exports = {
             userId: new mongoose.Types.ObjectId(userId),
           },
         ],
+        deleted: {
+          $exists: false,
+        },
       },
     },
     {
@@ -31,7 +34,6 @@ module.exports = {
     {
       $limit: parseInt(_limit),
     },
-
     {
       $project: {
         userId: 1,
@@ -537,12 +539,11 @@ module.exports = {
       },
     },
   ],
-
   /**
    * Get reported posts recently reported first
    * @returns getReportPipeline
    */
-  getReportedPosts: () => [
+  getReportedPosts: (userId) => [
     {
       $lookup: {
         from: 'users',
@@ -584,6 +585,85 @@ module.exports = {
     {
       $sort: {
         reportedCount: -1,
+      },
+    },
+    {
+      $lookup: {
+        from: 'posts',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'post',
+        pipeline: [
+          {
+            $project: {
+              userId: 1,
+              title: 1,
+              body: 1,
+              publishAt: 1,
+              isEdited: {
+                $ifNull: ['$isEdited', false],
+              },
+              numberOfLikes: {
+                $size: '$likes',
+              },
+              userLike: {
+                $filter: {
+                  input: '$likes',
+                  as: 'like',
+                  cond: {
+                    $eq: ['$$like.userId', userId],
+                  },
+                },
+              },
+            },
+          },
+          {
+            $lookup: {
+              from: 'comments',
+              localField: '_id',
+              foreignField: 'postId',
+              as: 'commentCount',
+              pipeline: [
+                {
+                  $project: {
+                    _id: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $addFields: {
+              commentCount: {
+                $size: '$commentCount',
+              },
+            },
+          },
+          {
+            $addFields: {
+              likedByUser: {
+                $gt: [
+                  {
+                    $size: '$userLike',
+                  },
+                  0,
+                ],
+              },
+            },
+          },
+          {
+            $unwind: {
+              path: '$userLike',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $unwind: {
+        path: '$post',
+        preserveNullAndEmptyArrays: false,
       },
     },
   ],
